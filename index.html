@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2班 · 智慧班级平台</title>
+    <meta name="description" content="2班智慧班级平台 - AI助手 · 班级社区 · 群聊 · 成绩管理 · 日程表 · 文件共享">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --ps-blue: #003791;
+            --ps-light-blue: #0070CC;
+            --ps-cyan: #00B4D8;
+            --ps-white: #FFFFFF;
+            --ps-dark: #0A0A0A;
+            --ps-gray: #1A1A1A;
+            --ps-card: rgba(255, 255, 255, 0.03);
+            --ps-card-hover: rgba(255, 255, 255, 0.06);
+            --ps-border: rgba(255, 255, 255, 0.08);
+            --ps-text: #FFFFFF;
+            --ps-text-secondary: rgba(255, 255, 255, 0.55);
+            --ps-accent: #0070CC;
+            --ps-gradient: linear-gradient(135deg, #003791 0%, #0070CC 50%, #00B4D8 100%);
+            --ps-glow: 0 0 40px rgba(0, 112, 204, 0.25);
+            --apple-radius: 20px;
+            --apple-radius-sm: 14px;
+            --apple-transition: cubic-bezier(0.22, 0.61, 0.36, 1);
+            --apple-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --admin-gold: #d4a843;
+            --admin-gradient: linear-gradient(135deg, #8b6914 0%, #d4a843 50%, #f0d078 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--ps-dark);
+            color: var(--ps-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .ps-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .ps-bg-gradient {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 15% 40%, rgba(0, 55, 145, 0.5) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 25%, rgba(0, 112, 204, 0.35) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 75%, rgba(0, 180, 216, 0.25) 0%, transparent 55%);
+            animation: gradientShift 20s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            25% { opacity: .75; }
+            50% { opacity: .9; }
+            75% { opacity: .8; }
+        }
+
+        .ps-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--ps-cyan);
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: .7; }
+            90% { opacity: .15; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, .75);
+            backdrop-filter: blur(35px) saturate(200%);
+            -webkit-backdrop-filter: blur(35px) saturate(200%);
+            border-bottom: 1px solid var(--ps-border);
+            padding: .7rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: all .4s var(--apple-transition);
+            flex-wrap: wrap;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            cursor: pointer;
+            user-select: none;
+            transition: transform .3s;
+        }
+
+        .logo-area:hover {
+            transform: scale(1.03);
+        }
+
+        .class-icon {
+            background: var(--ps-gradient);
+            color: #fff;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.25rem;
+            font-family: 'Space Grotesk', sans-serif;
+            box-shadow: var(--ps-glow);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--ps-text);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            font-weight: 500;
+            font-size: .85rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--ps-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .4rem 0;
+            position: relative;
+            transition: all .3s;
+            white-space: nowrap;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--ps-gradient);
+            border-radius: 2px;
+            transition: width .3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--ps-text);
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--ps-border);
+            border-radius: 25px;
+            padding: .4rem .8rem;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            color: var(--ps-text-secondary);
+            transition: all .3s;
+        }
+
+        .search-box:focus-within {
+            background: rgba(255, 255, 255, .1);
+            border-color: var(--ps-light-blue);
+            box-shadow: 0 0 20px rgba(0, 112, 204, .2);
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            color: var(--ps-text);
+            font-size: .82rem;
+            width: 100px;
+            font-family: inherit;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+
+        .btn {
+            border: none;
+            padding: .5rem 1.2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s;
+            font-size: .8rem;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--ps-gradient);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 55, 145, .4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 55, 145, .55);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--ps-text);
+            border: 1.5px solid var(--ps-border);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .btn-sm {
+            padding: .3rem .8rem;
+            font-size: .72rem;
+        }
+
+        .btn-admin {
+            background: var(--admin-gradient);
+            color: #1a1a1a;
+            box-shadow: 0 4px 15px rgba(212, 168, 67, .4);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            background: rgba(255, 255, 255, .06);
+            padding: .3rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: .8rem;
+            border: 1px solid var(--ps-border);
+        }
+
+        .role-tag {
+            font-size: .65rem;
+            background: var(--ps-gradient);
+            color: #fff;
+            padding: .1rem .5rem;
+            border-radius: 10px;
+        }
+
+        .role-tag.admin {
+            background: var(--admin-gradient);
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+
+        .role-tag.host {
+            background: linear-gradient(135deg, #1e4a6b, #3b7fb5);
+            color: #fff;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: none;
+            color: #ff4757;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .75rem;
+            padding: .2rem .5rem;
+            border-radius: 8px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 71, 87, .1);
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: rgba(10, 10, 10, .55);
+            backdrop-filter: blur(30px);
+            border-right: 1px solid var(--ps-border);
+            display: flex;
+            flex-direction: column;
+            transition: all .4s;
+            overflow-y: auto;
+        }
+
+        .sidebar.hidden {
+            display: none;
+        }
+
+        .sidebar-header {
+            padding: 1.2rem 1rem .8rem;
+            font-weight: 700;
+            font-size: 1rem;
+            border-bottom: 1px solid var(--ps-border);
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 10, .75);
+            backdrop-filter: blur(20px);
+            z-index: 5;
+        }
+
+        .sidebar-list {
+            list-style: none;
+            padding: .5rem;
+        }
+
+        .sidebar-item {
+            padding: .7rem .9rem;
+            margin: .1rem 0;
+            border-radius: var(--apple-radius-sm);
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            cursor: pointer;
+            transition: all .3s;
+            font-weight: 500;
+            font-size: .85rem;
+            border: 1px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: var(--ps-card-hover);
+            border-color: var(--ps-border);
+            transform: translateX(4px);
+        }
+
+        .sidebar-item.active {
+            background: rgba(0, 112, 204, .12);
+            border-color: rgba(0, 112, 204, .25);
+        }
+
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: transparent;
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, .1);
+            border-radius: 3px;
+        }
+
+        .card {
+            background: var(--ps-card);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--ps-border);
+            border-radius: var(--apple-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            transition: all .4s;
+            animation: cardAppear .5s var(--apple-transition) both;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, .04);
+            border-color: rgba(255, 255, 255, .15);
+            box-shadow: var(--apple-shadow);
+            transform: translateY(-2px);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: .6rem;
+            background: var(--ps-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: .6rem;
+        }
+
+        .card h4 {
+            font-size: .95rem;
+            font-weight: 600;
+            margin-bottom: .4rem;
+            color: var(--ps-text-secondary);
+        }
+
+        select,
+        input[type="text"],
+        input[type="password"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        input[type="file"],
+        textarea {
+            padding: .6rem .8rem;
+            border-radius: 10px;
+            border: 1.5px solid var(--ps-border);
+            font-family: inherit;
+            font-size: .85rem;
+            background: rgba(255, 255, 255, .04);
+            color: var(--ps-text);
+            transition: all .3s;
+            width: 100%;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        select:focus,
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--ps-light-blue);
+            box-shadow: 0 0 20px rgba(0, 112, 204, .15);
+            background: rgba(255, 255, 255, .07);
+        }
+
+        select option {
+            background: var(--ps-dark);
+            color: var(--ps-text);
+        }
+
+        .grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        /* PS5 Welcome Hero */
+        .welcome-hero {
+            background: linear-gradient(135deg, rgba(0, 55, 145, 0.4) 0%, rgba(0, 112, 204, 0.3) 50%, rgba(0, 180, 216, 0.2) 100%);
+            border: 1px solid var(--ps-border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .welcome-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .welcome-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: .5rem;
+            background: var(--ps-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-hero .subtitle {
+            font-size: 1rem;
+            opacity: .7;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-hero .stats-row {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .welcome-hero .stat-item {
+            text-align: center;
+        }
+
+        .welcome-hero .stat-item .stat-num {
+            font-size: 1.8rem;
+            font-weight: 900;
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--ps-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-hero .stat-item .stat-label {
+            font-size: .75rem;
+            opacity: .6;
+        }
+
+        /* PS5 Module Cards */
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .module-card {
+            background: var(--ps-card);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--ps-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all .4s var(--apple-transition);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .module-card:hover {
+            background: rgba(255, 255, 255, .05);
+            border-color: rgba(255, 255, 255, .15);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
+        }
+
+        .module-card-header {
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            border-bottom: 1px solid var(--ps-border);
+        }
+
+        .module-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .module-card-icon.blue {
+            background: rgba(0, 112, 204, .2);
+            color: var(--ps-light-blue);
+        }
+
+        .module-card-icon.cyan {
+            background: rgba(0, 180, 216, .2);
+            color: var(--ps-cyan);
+        }
+
+        .module-card-icon.green {
+            background: rgba(16, 185, 129, .2);
+            color: var(--success);
+        }
+
+        .module-card-icon.orange {
+            background: rgba(245, 158, 11, .2);
+            color: var(--warning);
+        }
+
+        .module-card-icon.red {
+            background: rgba(239, 68, 68, .2);
+            color: var(--danger);
+        }
+
+        .module-card-icon.purple {
+            background: rgba(139, 92, 246, .2);
+            color: #8b5cf6;
+        }
+
+        .module-card-icon.gold {
+            background: rgba(212, 168, 67, .2);
+            color: var(--admin-gold);
+        }
+
+        .module-card-body {
+            padding: 1rem 1.5rem;
+        }
+
+        .module-card-body p {
+            font-size: .82rem;
+            opacity: .7;
+            line-height: 1.5;
+        }
+
+        .module-card-footer {
+            padding: .8rem 1.5rem;
+            border-top: 1px solid var(--ps-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .75rem;
+            opacity: .5;
+        }
+
+        /* Post List */
+        .post-list-item {
+            padding: .8rem 1rem;
+            border-bottom: 1px solid var(--ps-border);
+            cursor: pointer;
+            transition: all .3s;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .post-list-item:hover {
+            background: rgba(255, 255, 255, .03);
+        }
+
+        .post-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .post-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--ps-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .8rem;
+            flex-shrink: 0;
+        }
+
+        .post-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .post-info .post-title {
+            font-weight: 600;
+            font-size: .88rem;
+            margin-bottom: .2rem;
+        }
+
+        .post-info .post-meta {
+            font-size: .72rem;
+            opacity: .5;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .post-info .post-excerpt {
+            font-size: .78rem;
+            opacity: .6;
+            margin-top: .2rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .visibility-badge {
+            font-size: .65rem;
+            padding: .1rem .5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .visibility-public {
+            background: rgba(16, 185, 129, .2);
+            color: var(--success);
+        }
+
+        .visibility-class {
+            background: rgba(0, 112, 204, .2);
+            color: var(--ps-light-blue);
+        }
+
+        .visibility-private {
+            background: rgba(239, 68, 68, .2);
+            color: var(--danger);
+        }
+
+        .sort-tabs {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .sort-tab {
+            padding: .4rem 1rem;
+            border-radius: 20px;
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s;
+            background: transparent;
+            color: var(--ps-text-secondary);
+            border: 1px solid var(--ps-border);
+        }
+
+        .sort-tab.active {
+            background: var(--ps-gradient);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .sort-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, .05);
+        }
+
+        .schedule-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: .4rem;
+        }
+
+        .schedule-dot.exam {
+            background: var(--danger);
+        }
+
+        .schedule-dot.homework {
+            background: var(--warning);
+        }
+
+        .schedule-dot.event {
+            background: var(--info);
+        }
+
+        /* AI Chat */
+        .ai-full-chat {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 140px);
+            background: var(--ps-card);
+            border: 1px solid var(--ps-border);
+            border-radius: var(--apple-radius);
+            overflow: hidden;
+        }
+
+        .ai-chat-header {
+            padding: 1rem 1.3rem;
+            border-bottom: 1px solid var(--ps-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: .6rem;
+            background: rgba(10, 10, 10, .5);
+        }
+
+        .ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.3rem;
+            display: flex;
+            flex-direction: column;
+            gap: .8rem;
+        }
+
+        .msg {
+            padding: .8rem 1rem;
+            border-radius: 14px;
+            max-width: 78%;
+            animation: msgSlide .3s;
+            line-height: 1.5;
+            font-size: .88rem;
+        }
+
+        @keyframes msgSlide {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg.user {
+            background: var(--ps-gradient);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg.ai {
+            background: rgba(255, 255, 255, .06);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--ps-border);
+        }
+
+        .msg .msg-label {
+            font-size: .7rem;
+            font-weight: 600;
+            opacity: .6;
+            margin-bottom: .2rem;
+        }
+
+        .ai-input-bar {
+            padding: .8rem 1.3rem;
+            border-top: 1px solid var(--ps-border);
+            display: flex;
+            gap: .6rem;
+            background: rgba(10, 10, 10, .5);
+        }
+
+        .ai-input-bar input {
+            flex: 1;
+        }
+
+        .ai-status {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .3rem .8rem;
+            background: rgba(0, 180, 216, .08);
+            border-radius: 20px;
+            font-size: .75rem;
+            color: var(--ps-cyan);
+            border: 1px solid rgba(0, 180, 216, .18);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--ps-cyan);
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .4; }
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 3px;
+        }
+
+        .loading-dots span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--ps-cyan);
+            animation: loadingDot 1.4s ease-in-out infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: .2s; }
+        .loading-dots span:nth-child(3) { animation-delay: .4s; }
+
+        @keyframes loadingDot {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .65);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            animation: fadeIn .25s;
+        }
+
+        .modal-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--ps-gray);
+            border: 1px solid var(--ps-border);
+            border-radius: var(--apple-radius);
+            padding: 2rem;
+            width: 500px;
+            max-width: 92vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, .5);
+            animation: slideUp .35s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h3 {
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .modal-content label {
+            font-weight: 600;
+            font-size: .8rem;
+            color: var(--ps-text-secondary);
+            display: block;
+            margin-top: .7rem;
+            margin-bottom: .2rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: .7rem;
+            margin-top: 1.2rem;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        .toggle-link {
+            color: var(--ps-light-blue);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: .82rem;
+            margin-top: .8rem;
+            display: block;
+            text-align: center;
+        }
+
+        .toast {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: var(--ps-gray);
+            color: var(--ps-text);
+            padding: .8rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: .82rem;
+            z-index: 300;
+            border: 1px solid var(--ps-border);
+            animation: toastIn .35s, toastOut .35s 2.5s forwards;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+        }
+
+        .toast.success {
+            border-color: rgba(16, 185, 129, .5);
+        }
+
+        .toast.error {
+            border-color: rgba(239, 68, 68, .5);
+        }
+
+        @keyframes toastIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        .info-banner {
+            background: rgba(0, 112, 204, .08);
+            border-left: 3px solid var(--ps-light-blue);
+            padding: .9rem 1.1rem;
+            border-radius: 0 10px 10px 0;
+            margin-top: .9rem;
+            font-size: .82rem;
+            color: var(--ps-text-secondary);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .2rem .7rem;
+            border-radius: 15px;
+            font-size: .72rem;
+            font-weight: 600;
+            margin: .15rem;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--ps-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .85rem;
+        }
+
+        th,
+        td {
+            padding: .7rem .9rem;
+            text-align: left;
+            border-bottom: 1px solid var(--ps-border);
+        }
+
+        th {
+            font-weight: 700;
+            color: var(--ps-text-secondary);
+            font-size: .78rem;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, .02);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: .2rem .6rem;
+            border-radius: 12px;
+            font-size: .7rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, .2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, .2);
+            color: var(--warning);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, .2);
+            color: var(--info);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, .2);
+            color: var(--danger);
+        }
+
+        .badge-admin {
+            background: rgba(212, 168, 67, .2);
+            color: var(--admin-gold);
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--ps-border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all .3s;
+            margin: .5rem 0;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--ps-light-blue);
+            background: rgba(0, 112, 204, .05);
+        }
+
+        .file-upload-area i {
+            font-size: 2rem;
+            margin-bottom: .5rem;
+            opacity: .5;
+        }
+
+        .admin-panel {
+            border: 1px solid rgba(212, 168, 67, .3);
+            background: rgba(212, 168, 67, .05);
+        }
+
+        .admin-panel:hover {
+            border-color: rgba(212, 168, 67, .5);
+        }
+
+        @media(max-width:768px) {
+            .top-nav {
+                padding: .5rem .8rem;
+            }
+            .nav-links a span.nav-text {
+                display: none;
+            }
+            .nav-links {
+                gap: .6rem;
+            }
+            .sidebar {
+                width: 100%;
+                min-width: 100%;
+                position: fixed;
+                top: 60px;
+                z-index: 50;
+                height: calc(100vh - 60px);
+            }
+            .content-area {
+                padding: .8rem;
+            }
+            .welcome-hero h1 {
+                font-size: 1.5rem;
+            }
+            .welcome-hero {
+                padding: 1.5rem;
+            }
+            .module-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ps-background">
+        <div class="ps-bg-gradient"></div>
+        <div class="ps-particles" id="particles"></div>
+    </div>
+    <div id="toastContainer"></div>
+
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="top-nav" id="topNav">
+            <div class="logo-area" onclick="navigateTo('home')">
+                <div class="class-icon">2班</div>
+                <span class="logo-text">智慧班级</span>
+            </div>
+            <nav class="nav-links" id="mainNav">
+                <a href="#" data-page="home" class="active"><i class="fas fa-home"></i> <span class="nav-text">主页</span></a>
+                <a href="#" data-page="ai"><i class="fas fa-robot"></i> <span class="nav-text">C2 AI</span></a>
+                <a href="#" data-page="community"><i class="fas fa-users"></i> <span class="nav-text">社区</span></a>
+                <a href="#" data-page="messages"><i class="fas fa-comments"></i> <span class="nav-text">消息</span></a>
+                <a href="#" data-page="schedule"><i class="fas fa-calendar"></i> <span class="nav-text">日程</span></a>
+                <a href="#" data-page="grades"><i class="fas fa-chart-bar"></i> <span class="nav-text">成绩</span></a>
+                <a href="#" data-page="files"><i class="fas fa-folder"></i> <span class="nav-text">文件</span></a>
+                <a href="#" data-page="support"><i class="fas fa-life-ring"></i> <span class="nav-text">支持</span></a>
+            </nav>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="全局搜索..." id="globalSearch" onkeypress="if(event.key==='Enter')performSearch()">
+            </div>
+            <div class="user-menu" id="userMenuContainer"></div>
+        </header>
+
+        <!-- 主内容区 -->
+        <div class="main-container">
+            <aside class="sidebar hidden" id="chatSidebar">
+                <div class="sidebar-header"><i class="fas fa-comment-dots"></i> 群聊</div>
+                <ul class="sidebar-list" id="groupList"></ul>
+            </aside>
+            <main class="content-area" id="mainContent"></main>
+        </div>
+    </div>
+
+    <!-- 普通登录/注册模态框 -->
+    <div class="modal-overlay hidden" id="authModal">
+        <div class="modal-content">
+            <h3 id="authTitle">   登录</h3>
+            <label>选择身份</label>
+            <select id="identitySelect">
+                <option value="teacher">  ‍   老师（含班主任）</option>
+                <option value="parent">  ‍  ‍   家长</option>
+                <option value="student">   学生</option>
+            </select>
+            <label>用户名</label>
+            <input type="text" id="usernameInput" placeholder="请输入用户名">
+            <label>密码</label>
+            <input type="password" id="passwordInput" placeholder="请输入密码">
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="handleAuth()">✅ 确认</button>
+                <button class="btn btn-outline" onclick="closeAuthModal()">❌ 取消</button>
+            </div>
+            <span class="toggle-link" id="toggleAuthText" onclick="toggleAuthMode()">还没有账号？去注册</span>
+        </div>
+    </div>
+
+    <!-- 管理员/主机端专用登录模态框 -->
+    <div class="modal-overlay hidden" id="adminLoginModal">
+        <div class="modal-content">
+            <h3>   管理员/主机端登录</h3>
+            <p style="text-align:center;opacity:.7;font-size:.85rem;margin-bottom:1rem">此入口仅限管理员和班级电脑使用</p>
+            <label>用户名</label>
+            <input type="text" id="adminUsernameInput" placeholder="管理员或主机端用户名">
+            <label>密码</label>
+            <input type="password" id="adminPasswordInput" placeholder="请输入密码">
+            <div class="modal-actions">
+                <button class="btn btn-admin" onclick="handleAdminLogin()">   登录</button>
+                <button class="btn btn-outline" onclick="closeAdminLoginModal()">取消</button>
+            </div>
+            <p style="text-align:center;font-size:.75rem;opacity:.5;margin-top:.8rem">此账号无法通过普通注册获取</p>
+        </div>
+    </div>
+
+    <!-- 通用模态框 -->
+    <div class="modal-overlay hidden" id="generalModal">
+        <div class="modal-content" id="generalModalContent"></div>
+    </div>
+
+    <script>
+        // ==================== 背景粒子动画 ====================
+        (function() {
+            const pc = document.getElementById('particles');
+            const colors = ['#00B4D8', '#0070CC', '#003791', '#FFFFFF'];
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                const s = Math.random() * 3 + 2;
+                p.style.width = s + 'px';
+                p.style.height = s + 'px';
+                p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                p.style.animationDuration = Math.random() * 10 + 8 + 's';
+                p.style.animationDelay = Math.random() * 10 + 's';
+                pc.appendChild(p);
+            }
+        })();
+
+        // ==================== 数据库 ====================
+        const DB_KEY = 'class2_database_v8';
+        const PRESET_ADMIN = { id: 'admin001', username: 'admin', password: 'class2admin2024', role: 'admin', name: '管理员' };
+        const PRESET_HOST = { id: 'host001', username: 'host', password: 'class2host2024', role: 'host', name: '班级电脑' };
+
+        function getDB() {
+            let db = localStorage.getItem(DB_KEY);
+            if (!db) {
+                db = JSON.stringify({
+                    users: [
+                        { ...PRESET_ADMIN },
+                        { ...PRESET_HOST },
+                        { id: 'u3', username: 'teacher1', password: '123456', role: 'teacher', name: '张老师' },
+                        { id: 'u4', username: 'student1', password: '123456', role: 'student', name: '李华', studentId: 'A12' },
+                        { id: 'u5', username: 'parent1', password: '123456', role: 'parent', name: '李华家长', linkedStudent: 'A12' }
+                    ],
+                    messages: { teacher: [], class: [], parent: [], student: [] },
+                    posts: [],
+                    comments: [],
+                    schedules: [],
+                    grades: [],
+                    files: [],
+                    nextId: 200
+                });
+                localStorage.setItem(DB_KEY, db);
+            } else {
+                db = JSON.parse(db);
+                let needsSave = false;
+                if (!db.users.find(u => u.id === 'admin001')) {
+                    db.users.push({ ...PRESET_ADMIN });
+                    needsSave = true;
+                }
+                if (!db.users.find(u => u.id === 'host001')) {
+                    db.users.push({ ...PRESET_HOST });
+                    needsSave = true;
+                }
+                if (needsSave) localStorage.setItem(DB_KEY, JSON.stringify(db));
+            }
+            return db;
+        }
+
+        function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+        function genId() { const db = getDB(); db.nextId++; saveDB(db); return 'id' + db.nextId; }
+
+        // ==================== 当前用户状态 ====================
+        const STORAGE_KEY_CURRENT = 'class2_currentUser_v8';
+        const SK_KEY = 'deepseek_api_key_v6';
+        let currentUser = JSON.parse(localStorage.getItem(STORAGE_KEY_CURRENT) || 'null');
+        let authMode = 'login';
+        let currentPage = 'home';
+        let deepseekApiKey = localStorage.getItem(SK_KEY) || '';
+        let conversationHistory = [];
+        let currentGroup = 'class';
+        let searchResults = null;
+        let postSortOrder = 'newest';
+
+        // ==================== 工具函数 ====================
+        function toast(m, t = '') {
+            const c = document.getElementById('toastContainer');
+            const d = document.createElement('div');
+            d.className = `toast ${t}`;
+            d.textContent = m;
+            c.appendChild(d);
+            setTimeout(() => d.remove(), 3000);
+        }
+
+        function saveCU() {
+            currentUser ? localStorage.setItem(STORAGE_KEY_CURRENT, JSON.stringify(currentUser)) : localStorage.removeItem(STORAGE_KEY_CURRENT);
+        }
+
+        function roleName(r) {
+            return { admin: '管理员', teacher: '老师', parent: '家长', student: '学生', host: '主机端' } [r] || r;
+        }
+
+        function getCurrentUserName() {
+            if (!currentUser) return '';
+            const db = getDB();
+            const u = db.users.find(u => u.id === currentUser.id);
+            return u ? u.name : currentUser.username;
+        }
+
+        // ==================== DeepSeek API ====================
+        async function callDeepSeek(msg) {
+            if (!deepseekApiKey) return simulateAI(msg);
+            try {
+                const messages = [
+                    { role: 'system', content: '你是C2 Intelligence，2班智慧班级平台的AI助手。你友好、博学，能用中文流利交流。' },
+                    ...conversationHistory.slice(-12),
+                    { role: 'user', content: msg }
+                ];
+                const r = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${deepseekApiKey}` },
+                    body: JSON.stringify({ model: 'deepseek-chat', messages, temperature: .7, max_tokens: 2000 })
+                });
+                if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error?.message || `HTTP ${r.status}`); }
+                const d = await r.json();
+                const reply = d.choices[0].message.content;
+                conversationHistory.push({ role: 'user', content: msg }, { role: 'assistant', content: reply });
+                return reply;
+            } catch (e) { console.error(e); return `❌ API错误: ${e.message}\n\n离线模式...`; }
+        }
+
+        function simulateAI(msg) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const reply = `收到："${msg}"。\n\n   设置DeepSeek API Key获得更强大回答。`;
+                    conversationHistory.push({ role: 'user', content: msg }, { role: 'assistant', content: reply });
+                    resolve(reply);
+                }, 600 + Math.random() * 800);
+            });
+        }
+
+        function setApiKey() {
+            const key = prompt('请输入 DeepSeek API Key:\n\n获取地址：platform.deepseek.com', deepseekApiKey);
+            if (key !== null && key.trim()) {
+                deepseekApiKey = key.trim();
+                localStorage.setItem(SK_KEY, deepseekApiKey);
+                conversationHistory = [];
+                toast('✅ API Key 已保存！', 'success');
+                renderAll();
+            }
+        }
+
+        // ==================== 全局搜索 ====================
+        function performSearch() {
+            const query = document.getElementById('globalSearch').value.trim().toLowerCase();
+            if (!query) { toast('请输入搜索内容', 'error'); return; }
+            const db = getDB();
+            searchResults = {
+                users: db.users.filter(u => u.name?.toLowerCase().includes(query) || u.username.toLowerCase().includes(query)),
+                posts: db.posts.filter(p => p.title.toLowerCase().includes(query) || p.content.toLowerCase().includes(query) || p.tags?.some(t => t.toLowerCase().includes(query))),
+                schedules: db.schedules.filter(s => s.title.toLowerCase().includes(query) || s.description?.toLowerCase().includes(query)),
+                files: db.files.filter(f => f.name.toLowerCase().includes(query)),
+                grades: db.grades.filter(g => g.studentName?.toLowerCase().includes(query) || g.subject.toLowerCase().includes(query)),
+                query: query
+            };
+            navigateTo('search');
+        }
+
+        // ==================== 渲染引擎 ====================
+        function renderAll() { renderUserMenu();
+            renderChatSidebar();
+            renderMain();
+            updateNav(); }
+
+        function renderUserMenu() {
+            const c = document.getElementById('userMenuContainer');
+            const userName = getCurrentUserName();
+            c.innerHTML = currentUser ? `
+                <div class="user-badge">
+                    ${currentUser.role==='admin'?'   ':currentUser.role==='host'?'   ':''}<i class="fas fa-user-circle"></i> ${userName||currentUser.username}
+                    <span class="role-tag ${currentUser.role==='admin'?'admin':currentUser.role==='host'?'host':''}">${roleName(currentUser.role)}</span>
+                    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+                </div>` : `
+                <button class="btn btn-primary btn-sm" onclick="openAuth('login')"><i class="fas fa-sign-in-alt"></i> 登录</button>
+                <button class="btn btn-outline btn-sm" onclick="openAuth('register')"><i class="fas fa-user-plus"></i> 注册</button>
+                <button class="btn btn-admin btn-sm" onclick="openAdminLoginModal()" title="管理员/主机端入口"><i class="fas fa-crown"></i></button>`;
+        }
+
+        function renderChatSidebar() {
+            const s = document.getElementById('chatSidebar');
+            if (currentPage !== 'messages' || !currentUser) { s.classList.add('hidden'); return; }
+            s.classList.remove('hidden');
+            const groups = [
+                { id: 'teacher', name: '  ‍   教师群', icon: 'fa-chalkboard-teacher', roles: ['teacher', 'admin'] },
+                { id: 'class', name: '   班级群', icon: 'fa-school', roles: ['teacher', 'student', 'parent', 'host', 'admin'] },
+                { id: 'parent', name: '  ‍  ‍   家长群', icon: 'fa-user-friends', roles: ['parent'] },
+                { id: 'student', name: '   学生群', icon: 'fa-graduation-cap', roles: ['student'] }
+            ];
+            const ug = groups.filter(g => g.roles.includes(currentUser.role));
+            const l = document.getElementById('groupList');
+            l.innerHTML = ug.map(g => `<li class="sidebar-item${currentGroup===g.id?' active':''}" data-group="${g.id}"><i class="fas ${g.icon}"></i> ${g.name}</li>`).join('');
+            l.querySelectorAll('.sidebar-item').forEach(i => i.addEventListener('click', function() { currentGroup = this.dataset.group;
+                renderAll(); }));
+        }
+
+        function renderMain() {
+            const m = document.getElementById('mainContent');
+            switch (currentPage) {
+                case 'home':
+                    renderHomePage(m);
+                    break;
+                case 'ai':
+                    renderAIPage(m);
+                    break;
+                case 'community':
+                    renderCommunityPage(m);
+                    break;
+                case 'messages':
+                    renderMessagesPage(m);
+                    break;
+                case 'schedule':
+                    renderSchedulePage(m);
+                    break;
+                case 'grades':
+                    renderGradesPage(m);
+                    break;
+                case 'files':
+                    renderFilesPage(m);
+                    break;
+                case 'support':
+                    renderSupportPage(m);
+                    break;
+                case 'search':
+                    renderSearchPage(m);
+                    break;
+                default:
+                    renderHomePage(m);
+            }
+        }
+
+        function updateNav() {
+            document.querySelectorAll('#mainNav a').forEach(a => a.classList.toggle('active', a.dataset.page === currentPage));
+        }
+
+        function navigateTo(p) { currentPage = p;
+            searchResults = null;
+            renderAll();
+            document.querySelector('.content-area').scrollTop = 0; }
+
+        // ==================== 帖子可见性过滤 ====================
+        function getVisiblePosts(db) {
+            if (!currentUser) return db.posts.filter(p => p.visibility === 'public');
+            if (currentUser.role === 'admin') return db.posts;
+            return db.posts.filter(p => {
+                if (p.visibility === 'public') return true;
+                if (p.visibility === 'class') return true;
+                if (p.visibility === 'teachers' && (currentUser.role === 'teacher' || currentUser.role === 'admin')) return true;
+                if (p.visibility === 'private' && p.authorId === currentUser.id) return true;
+                return false;
+            });
+        }
+
+        function sortPosts(posts, order) {
+            switch (order) {
+                case 'oldest':
+                    return [...posts].sort((a, b) => new Date(a.time) - new Date(b.time));
+                case 'popular':
+                    return [...posts].sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
+                default:
+                    return [...posts].sort((a, b) => new Date(b.time) - new Date(a.time));
+            }
+        }
+
+        function getVisibilityLabel(v) {
+            const map = { public: '   公开', class: '   班级可见', teachers: '  ‍   仅教师', private: '   仅自己' };
+            return map[v] || v;
+        }
+
+        function getVisibilityClass(v) {
+            const map = { public: 'visibility-public', class: 'visibility-class', teachers: 'visibility-class', private: 'visibility-private' };
+            return map[v] || '';
+        }
+
+        // ==================== PS5 Welcome 主页 ====================
+        function renderHomePage(m) {
+            const db = getDB();
+            const visiblePosts = getVisiblePosts(db);
+            const sortedPosts = sortPosts(visiblePosts, postSortOrder);
+            const recentPosts = sortedPosts.slice(0, 5);
+            const upcomingSchedules = db.schedules.sort((a, b) => new Date(a.date) - new Date(b.date)).filter(s => new Date(s.date) >= new Date(new Date().toDateString())).slice(0, 4);
+            const recentFiles = db.files.sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 4);
+            const studentGrades = currentUser?.role === 'student' ? db.grades.filter(g => g.studentId === currentUser.studentId).slice(-3) : [];
+            const classA = Array.from({ length: 26 }, (_, i) => `A${i+1}`);
+            const classB = Array.from({ length: 25 }, (_, i) => `B${i+1}`);
+
+            m.innerHTML = `
+            <div class="welcome-hero">
+                <h1>   欢迎回来${currentUser?(currentUser.role==='admin'?'    ':currentUser.role==='host'?'    ':' ')+getCurrentUserName():''}</h1>
+                <p class="subtitle">2班 · 智慧班级平台 |    ${new Date().toLocaleDateString('zh-CN',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
+                <div class="stats-row">
+                    <div class="stat-item"><div class="stat-num">${db.users.length}</div><div class="stat-label">注册成员</div></div>
+                    <div class="stat-item"><div class="stat-num">${db.posts.length}</div><div class="stat-label">社区帖子</div></div>
+                    <div class="stat-item"><div class="stat-num">${db.files.length}</div><div class="stat-label">共享文件</div></div>
+                    <div class="stat-item"><div class="stat-num">${db.schedules.length}</div><div class="stat-label">日程事件</div></div>
+                </div>
+            </div>
+            <div class="module-grid">
+                <div class="module-card" ${(currentUser?.role==='host'||currentUser?.role==='admin')?'onclick="window._homeRandomPick()"':''}>
+                    <div class="module-card-header">
+                        <div class="module-card-icon orange"><i class="fas fa-shuffle"></i></div>
+                        <div><h4 style="margin:0">   随机抽选</h4></div>
+                    </div>
+                    <div class="module-card-body">
+                        ${(currentUser?.role==='host'||currentUser?.role==='admin')?`
+                            <div style="display:flex;gap:.5rem;margin-bottom:.8rem">
+                                <select id="homeRandomGroup" style="width:auto;flex:1" onclick="event.stopPropagation()"><option value="A">A班</option><option value="B">B班</option><option value="all">全班</option></select>
+                                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window._homeRandomPick()">抽取</button>
+                            </div>
+                            <div id="homeRandomResult" style="font-size:2.5rem;font-weight:900;text-align:center;font-family:'Space Grotesk',sans-serif;background:var(--ps-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">?</div>
+                        `:'<p style="text-align:center;padding:1rem">   主机端/管理员专属</p>'}
+                    </div>
+                    <div class="module-card-footer"><span>51名学生</span><span>A1~A26, B1~B25</span></div>
+                </div>
+                <div class="module-card" onclick="navigateTo('community')">
+                    <div class="module-card-header">
+                        <div class="module-card-icon blue"><i class="fas fa-newspaper"></i></div>
+                        <div><h4 style="margin:0">   最新动态</h4></div>
+                    </div>
+                    <div class="module-card-body" style="padding:0">
+                        ${recentPosts.length===0?'<p style="text-align:center;padding:1.5rem;opacity:.5">暂无帖子</p>':recentPosts.map(p=>`
+                            <div class="post-list-item" onclick="event.stopPropagation();showPostDetail('${p.id}')">
+                                <div class="post-avatar">${(p.authorName||'?')[0]}</div>
+                                <div class="post-info">
+                                    <div class="post-title">${p.title} <span class="visibility-badge ${getVisibilityClass(p.visibility)}">${getVisibilityLabel(p.visibility)}</span></div>
+                                    <div class="post-excerpt">${p.content.substring(0,50)}${p.content.length>50?'...':''}</div>
+                                    <div class="post-meta"><span>   ${p.authorName}</span><span>   ${new Date(p.time).toLocaleDateString()}</span><span>❤️ ${p.likes?.length||0}</span></div>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                    <div class="module-card-footer"><span>${visiblePosts.length} 条可见</span><span onclick="event.stopPropagation();navigateTo('community')" style="color:var(--ps-light-blue);cursor:pointer">查看全部 →</span></div>
+                </div>
+                <div class="module-card" onclick="navigateTo('schedule')">
+                    <div class="module-card-header">
+                        <div class="module-card-icon red"><i class="fas fa-calendar-alt"></i></div>
+                        <div><h4 style="margin:0">   近期日程</h4></div>
+                    </div>
+                    <div class="module-card-body">
+                        ${upcomingSchedules.length===0?'<p style="text-align:center;opacity:.5">暂无近期日程</p>':upcomingSchedules.map(s=>`
+                            <div style="display:flex;gap:.8rem;align-items:flex-start;margin-bottom:.6rem">
+                                <div class="schedule-dot ${s.type}"></div>
+                                <div style="flex:1"><div style="font-weight:600;font-size:.85rem">${s.title}</div><div style="font-size:.75rem;opacity:.5">   ${s.date} ${s.time||''}</div></div>
+                                <span class="badge ${s.type==='exam'?'badge-danger':s.type==='homework'?'badge-warning':'badge-info'}">${s.type==='exam'?'考试':s.type==='homework'?'作业':'活动'}</span>
+                            </div>`).join('')}
+                    </div>
+                    <div class="module-card-footer"><span>${db.schedules.length} 条日程</span><span onclick="event.stopPropagation();navigateTo('schedule')" style="color:var(--ps-light-blue);cursor:pointer">查看全部 →</span></div>
+                </div>
+                ${currentUser&&(currentUser.role==='student'||currentUser.role==='parent')?`
+                <div class="module-card" onclick="navigateTo('grades')">
+                    <div class="module-card-header"><div class="module-card-icon green"><i class="fas fa-chart-line"></i></div><div><h4 style="margin:0">   成绩概览</h4></div></div>
+                    <div class="module-card-body">${studentGrades.length===0?'<p style="text-align:center;opacity:.5">暂无成绩</p>':studentGrades.map(g=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem"><span style="font-size:.85rem">${g.subject}</span><span style="font-weight:700;font-size:1.1rem;font-family:'Space Grotesk',sans-serif;background:var(--ps-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${g.score}</span></div>`).join('')}</div>
+                    <div class="module-card-footer"><span>满分: ${studentGrades[0]?.maxScore||100}</span><span onclick="event.stopPropagation();navigateTo('grades')" style="color:var(--ps-light-blue);cursor:pointer">查看全部 →</span></div>
+                </div>`:''}
+                <div class="module-card" onclick="navigateTo('files')">
+                    <div class="module-card-header"><div class="module-card-icon cyan"><i class="fas fa-folder-open"></i></div><div><h4 style="margin:0">   最近文件</h4></div></div>
+                    <div class="module-card-body">${recentFiles.length===0?'<p style="text-align:center;opacity:.5">暂无文件</p>':recentFiles.map(f=>`<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem"><i class="fas fa-file" style="opacity:.4;font-size:1.2rem"></i><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</div><div style="font-size:.7rem;opacity:.4">${new Date(f.time).toLocaleDateString()}</div></div><a href="${f.url}" download="${f.name}" class="btn btn-outline btn-sm" onclick="event.stopPropagation()"><i class="fas fa-download"></i></a></div>`).join('')}</div>
+                    <div class="module-card-footer"><span>${db.files.length} 个文件</span><span onclick="event.stopPropagation();navigateTo('files')" style="color:var(--ps-light-blue);cursor:pointer">查看全部 →</span></div>
+                </div>
+                ${currentUser&&(currentUser.role==='teacher'||currentUser.role==='admin'||currentUser.role==='host')?`
+                <div class="module-card ${currentUser.role==='admin'?'admin-panel':''}">
+                    <div class="module-card-header"><div class="module-card-icon ${currentUser.role==='admin'?'gold':'purple'}"><i class="fas fa-gauge-high"></i></div><div><h4 style="margin:0">⚡ 快捷管理</h4></div></div>
+                    <div class="module-card-body"><div style="display:flex;flex-direction:column;gap:.5rem">
+                        <button class="btn btn-outline btn-sm" onclick="navigateTo('schedule');setTimeout(()=>showScheduleModal(),300)"><i class="fas fa-plus"></i> 添加日程</button>
+                        <button class="btn btn-outline btn-sm" onclick="navigateTo('community');setTimeout(()=>showNewPostModal(),300)"><i class="fas fa-pen"></i> 发布公告</button>
+                        <button class="btn btn-outline btn-sm" onclick="navigateTo('grades');setTimeout(()=>showGradeModal(),300)"><i class="fas fa-plus"></i> 录入成绩</button>
+                        <button class="btn btn-outline btn-sm" onclick="navigateTo('files');setTimeout(()=>showUploadModal(),300)"><i class="fas fa-upload"></i> 上传文件</button>
+                    </div></div>
+                </div>`:''}
+            </div>
+            <div class="info-banner">
+                <i class="fas fa-info-circle"></i>
+                <strong>测试：</strong>teacher1/student1/parent1 密码123456 |    admin/class2admin2024 |    host/class2host2024
+            </div>`;
+
+            window._homeRandomPick = function() {
+                if (!currentUser || (currentUser.role !== 'host' && currentUser.role !== 'admin')) return;
+                const s = document.getElementById('homeRandomGroup');
+                const pool = s.value === 'A' ? classA : s.value === 'B' ? classB : [...classA, ...classB];
+                const r = pool[Math.floor(Math.random() * pool.length)];
+                document.getElementById('homeRandomResult').textContent = r;
+                toast(`   抽中：${r}`, 'success');
+            };
+        }
+
+        // ==================== AI页面 ====================
+        function renderAIPage(m) {
+            m.innerHTML = `
+            <div class="ai-full-chat">
+                <div class="ai-chat-header">
+                    <h3 style="margin:0"><i class="fas fa-robot"></i> C2 Intelligence</h3>
+                    <div style="display:flex;gap:.5rem;align-items:center">
+                        <div class="ai-status" id="aiStatus"><span class="status-dot"></span><span>${deepseekApiKey?'DeepSeek V3':'离线模式'}</span></div>
+                        <button class="btn btn-outline btn-sm" onclick="setApiKey()"><i class="fas fa-key"></i></button>
+                    </div>
+                </div>
+                <div class="ai-messages" id="aiMessages"><div class="msg ai"><div class="msg-label"><i class="fas fa-robot"></i> C2</div><div>   你好！我是C2智能助手。<br>${deepseekApiKey?'✨ DeepSeek V3 已连接！':'   离线模式，点击  设置API Key。'}</div></div></div>
+                <div class="ai-input-bar">
+                    <input type="text" id="aiInput" placeholder="输入消息... (Enter发送)" onkeypress="if(event.key==='Enter')sendMsg()">
+                    <button class="btn btn-primary" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>`;
+            setTimeout(() => { const mb = document.getElementById('aiMessages'); if (mb) mb.scrollTop = mb.scrollHeight; }, 100);
+        }
+
+        async function sendMsg() {
+            const input = document.getElementById('aiInput'),
+                box = document.getElementById('aiMessages'),
+                statusEl = document.getElementById('aiStatus');
+            if (!input || !box) return;
+            const msg = input.value.trim();
+            if (!msg) return;
+            box.innerHTML +=
+                `<div class="msg user"><div class="msg-label"><i class="fas fa-user"></i> ${getCurrentUserName()||'你'}</div><div>${msg}</div></div>`;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+            if (statusEl) statusEl.innerHTML =
+                `<div class="loading-dots"><span></span><span></span><span></span></div><span>思考中...</span>`;
+            const reply = await callDeepSeek(msg);
+            if (statusEl) statusEl.innerHTML =
+                `<span class="status-dot"></span><span>${deepseekApiKey?'DeepSeek V3':'离线模式'}</span>`;
+            box.innerHTML +=
+                `<div class="msg ai"><div class="msg-label"><i class="fas fa-robot"></i> C2</div><div>${reply.replace(/\n/g,'<br>')}</div></div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // ==================== 社区页面 ====================
+        function renderCommunityPage(m) {
+            const db = getDB();
+            const visiblePosts = getVisiblePosts(db);
+            const sortedPosts = sortPosts(visiblePosts, postSortOrder);
+            m.innerHTML = `
+            <div class="welcome-hero" style="padding:1.5rem">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+                    <h3 style="margin:0"><i class="fas fa-users"></i>    班级社区</h3>
+                    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+                        <div class="sort-tabs">
+                            <button class="sort-tab ${postSortOrder==='newest'?'active':''}" onclick="setSortOrder('newest')">   最新</button>
+                            <button class="sort-tab ${postSortOrder==='oldest'?'active':''}" onclick="setSortOrder('oldest')">   最早</button>
+                            <button class="sort-tab ${postSortOrder==='popular'?'active':''}" onclick="setSortOrder('popular')">   最热</button>
+                        </div>
+                        ${currentUser?`<button class="btn btn-primary btn-sm" onclick="showNewPostModal()"><i class="fas fa-plus"></i> 发帖</button>`:''}
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-2">${sortedPosts.length===0?'<div class="card" style="text-align:center;opacity:.5;grid-column:1/-1">暂无帖子</div>':sortedPosts.map(p=>`
+                <div class="card" style="cursor:pointer" onclick="showPostDetail('${p.id}')">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.5rem"><h4 style="margin:0">${p.title}</h4><span class="visibility-badge ${getVisibilityClass(p.visibility)}">${getVisibilityLabel(p.visibility)}</span></div>
+                    <p style="font-size:.8rem;opacity:.6;margin:.3rem 0">   ${p.authorName} ·    ${new Date(p.time).toLocaleString()}</p>
+                    <p style="font-size:.85rem;margin:.5rem 0">${p.content.substring(0,120)}${p.content.length>120?'...':''}</p>
+                    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0">${(p.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+                    <div style="display:flex;gap:1rem;font-size:.8rem;opacity:.6"><span><i class="fas fa-heart"></i> ${p.likes?.length||0}</span><span><i class="fas fa-comment"></i> ${db.comments.filter(c=>c.postId===p.id).length}</span><span><i class="fas fa-eye"></i> ${p.views||0}</span></div>
+                </div>`).join('')}</div>`;
+        }
+
+        function setSortOrder(order) { postSortOrder = order;
+            renderAll(); }
+
+        function showNewPostModal() {
+            const modal = document.getElementById('generalModal');
+            document.getElementById('generalModalContent').innerHTML = `
+                <h3>   发布新帖</h3>
+                <label>标题</label><input type="text" id="postTitle" placeholder="输入标题">
+                <label>内容</label><textarea id="postContent" placeholder="输入内容..."></textarea>
+                <label>标签（逗号分隔）</label><input type="text" id="postTags" placeholder="数学,作业,讨论">
+                <label>可见范围</label><select id="postVisibility">
+                    <option value="public">   公开</option><option value="class">   班级可见</option>
+                    ${currentUser?.role==='teacher'||currentUser?.role==='admin'?'<option value="teachers">  ‍   仅教师</option>':''}
+                    <option value="private">   仅自己</option></select>
+                <div class="modal-actions"><button class="btn btn-primary" onclick="createPost()">发布</button><button class="btn btn-outline" onclick="closeGeneralModal()">取消</button></div>`;
+            modal.classList.remove('hidden');
+        }
+
+        function createPost() {
+            if (!currentUser) { toast('请先登录', 'error'); return; }
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            const tags = document.getElementById('postTags').value.split(',').map(t => t.trim()).filter(t => t);
+            const visibility = document.getElementById('postVisibility').value;
+            if (!title || !content) { toast('请填写标题和内容', 'error'); return; }
+            const db = getDB();
+            db.posts.push({ id: genId(), title, content, tags, visibility, authorId: currentUser.id, authorName: getCurrentUserName() || currentUser.username, time: new Date().toISOString(), likes: [], views: 0 });
+            saveDB(db);
+            closeGeneralModal();
+            renderAll();
+            toast('✅ 发布成功！', 'success');
+        }
+
+        function showPostDetail(postId) {
+            const db = getDB();
+            const post = db.posts.find(p => p.id === postId);
+            if (!post) return;
+            post.views = (post.views || 0) + 1;
+            saveDB(db);
+            const postComments = db.comments.filter(c => c.postId === postId);
+            const modal = document.getElementById('generalModal');
+            document.getElementById('generalModalContent').innerHTML = `
+                <h3>${post.title}</h3>
+                <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem"><span class="visibility-badge ${getVisibilityClass(post.visibility)}">${getVisibilityLabel(post.visibility)}</span>${(post.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+                <p style="font-size:.8rem;opacity:.6">   ${post.authorName} ·    ${new Date(post.time).toLocaleString()} ·    ${post.views}次</p>
+                <div style="margin:1rem 0;padding:.8rem;background:rgba(255,255,255,.03);border-radius:10px;max-height:200px;overflow-y:auto">${post.content.replace(/\n/g,'<br>')}</div>
+                <button class="btn btn-sm ${(post.likes||[]).includes(currentUser?.id)?'btn-primary':'btn-outline'}" onclick="likePost('${postId}')"><i class="fas fa-heart"></i> ${post.likes?.length||0}</button>
+                <h4 style="margin-top:1rem">   评论 (${postComments.length})</h4>
+                <div style="max-height:200px;overflow-y:auto;margin:.5rem 0">${postComments.map(c=>`<div style="padding:.5rem;border-bottom:1px solid var(--ps-border)"><strong style="font-size:.8rem">${c.authorName}</strong><span style="font-size:.7rem;opacity:.5;margin-left:.5rem">${new Date(c.time).toLocaleString()}</span><p style="font-size:.82rem;margin-top:.2rem">${c.content}</p></div>`).join('')||'<p style="opacity:.5">暂无评论</p>'}</div>
+                ${currentUser?`<div style="display:flex;gap:.5rem;margin-top:.5rem"><input type="text" id="commentInput" placeholder="添加评论..." style="flex:1"><button class="btn btn-primary btn-sm" onclick="addComment('${postId}')">发送</button></div>`:''}
+                <button class="btn btn-outline btn-sm" style="margin-top:1rem;width:100%" onclick="closeGeneralModal()">关闭</button>`;
+            modal.classList.remove('hidden');
+        }
+
+        function likePost(postId) {
+            if (!currentUser) { toast('请先登录', 'error'); return; }
+            const db = getDB();
+            const post = db.posts.find(p => p.id === postId);
+            if (!post) return;
+            if (!post.likes) post.likes = [];
+            const idx = post.likes.indexOf(currentUser.id);
+            if (idx > -1) post.likes.splice(idx, 1);
+            else post.likes.push(currentUser.id);
+            saveDB(db);
+            showPostDetail(postId);
+        }
+
+        function addComment(postId) {
+            if (!currentUser) return;
+            const input = document.getElementById('commentInput');
+            if (!input) return;
+            const content = input.value.trim();
+            if (!content) return;
+            const db = getDB();
+            db.comments.push({ id: genId(), postId, authorId: currentUser.id, authorName: getCurrentUserName() || currentUser.username, content, time: new Date().toISOString() });
+            saveDB(db);
+            showPostDetail(postId);
+            toast('   评论成功');
+        }
+
+        // ==================== 消息页面 ====================
+        function renderMessagesPage(m) {
+            if (!currentUser) { m.innerHTML =
+                    `<div class="card"><h3>   请先登录</h3><button class="btn btn-primary" onclick="openAuth('login')">去登录</button></div>`; return; }
+            const db = getDB();
+            const groupMsgs = db.messages[currentGroup] || [];
+            m.innerHTML = `
+            <div class="card" style="display:flex;flex-direction:column;height:calc(100vh - 180px)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h3 style="margin:0">${currentGroup==='teacher'?'  ‍   教师群':currentGroup==='class'?'   班级群':currentGroup==='parent'?'  ‍  ‍   家长群':'   学生群'}</h3><span class="badge badge-info">${groupMsgs.length} 条</span></div>
+                <div style="flex:1;overflow-y:auto;padding:.5rem;display:flex;flex-direction:column;gap:.6rem" id="msgList">${groupMsgs.length===0?'<p style="text-align:center;opacity:.5;padding:2rem">暂无消息</p>':groupMsgs.map(msg=>`<div style="padding:.6rem 1rem;background:rgba(255,255,255,.03);border-radius:10px"><div style="display:flex;justify-content:space-between;margin-bottom:.2rem"><strong style="font-size:.8rem">${msg.senderName}</strong><span style="font-size:.7rem;opacity:.5">${new Date(msg.time).toLocaleString()}</span></div><div style="font-size:.85rem">${msg.content}</div>${msg.fileUrl?`<a href="${msg.fileUrl}" target="_blank" style="color:var(--ps-cyan);font-size:.8rem"><i class="fas fa-paperclip"></i> 附件</a>`:''}</div>`).join('')}</div>
+                <div style="display:flex;gap:.5rem;margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--ps-border)">
+                    <input type="text" id="msgInput" placeholder="输入消息..." onkeypress="if(event.key==='Enter')sendGroupMsg()" style="flex:1">
+                    <button class="btn btn-outline btn-sm" onclick="document.getElementById('fileInput').click()"><i class="fas fa-paperclip"></i></button>
+                    <input type="file" id="fileInput" style="display:none" onchange="handleFileSelect(event)">
+                    <button class="btn btn-primary" onclick="sendGroupMsg()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>`;
+            setTimeout(() => { const ml = document.getElementById('msgList'); if (ml) ml.scrollTop = ml.scrollHeight; }, 100);
+        }
+
+        function sendGroupMsg() {
+            if (!currentUser) return;
+            const input = document.getElementById('msgInput');
+            if (!input) return;
+            const content = input.value.trim();
+            if (!content && !window._pendingFile) return;
+            const db = getDB();
+            if (!db.messages[currentGroup]) db.messages[currentGroup] = [];
+            db.messages[currentGroup].push({ id: genId(), senderId: currentUser.id, senderName: getCurrentUserName() || currentUser.username, content: content || '[文件]', time: new Date().toISOString(), fileUrl: window._pendingFile || null });
+            saveDB(db);
+            window._pendingFile = null;
+            renderAll();
+            const ml = document.getElementById('msgList');
+            if (ml) ml.scrollTop = ml.scrollHeight;
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) { window._pendingFile = e.target.result;
+                toast('   文件已选择'); };
+            reader.readAsDataURL(file);
+        }
+
+        // ==================== 日程页面 ====================
+        function renderSchedulePage(m) {
+            const db = getDB();
+            const canEdit = currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin' || currentUser.role === 'host');
+            m.innerHTML = `
+            <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0"><i class="fas fa-calendar-alt"></i> 班级日程</h3>${canEdit?`<button class="btn btn-primary btn-sm" onclick="showScheduleModal()"><i class="fas fa-plus"></i> 添加</button>`:''}</div></div>
+            <div class="grid grid-2">${db.schedules.length===0?'<div class="card" style="text-align:center;opacity:.5">暂无日程</div>':db.schedules.sort((a,b)=>new Date(a.date)-new Date(b.date)).map(s=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><h4>${s.title}</h4><span class="badge ${s.type==='exam'?'badge-danger':s.type==='homework'?'badge-warning':'badge-info'}">${s.type==='exam'?'考试':s.type==='homework'?'作业':'活动'}</span></div><p style="font-size:.8rem;opacity:.6">   ${s.date} ${s.time||''}</p>${s.description?`<p style="font-size:.82rem;margin-top:.3rem">${s.description}</p>`:''}${canEdit?`<button class="btn btn-danger btn-sm" style="margin-top:.5rem" onclick="deleteSchedule('${s.id}')"><i class="fas fa-trash"></i></button>`:''}</div>`).join('')}</div>`;
+        }
+
+        function showScheduleModal() {
+            document.getElementById('generalModalContent').innerHTML = `
+                <h3>   添加日程</h3><label>标题</label><input type="text" id="schedTitle" placeholder="日程标题"><label>类型</label><select id="schedType"><option value="event">活动</option><option value="homework">作业</option><option value="exam">考试</option></select><label>日期</label><input type="date" id="schedDate"><label>时间</label><input type="time" id="schedTime"><label>描述</label><textarea id="schedDesc" placeholder="详细描述..."></textarea>
+                <div class="modal-actions"><button class="btn btn-primary" onclick="addSchedule()">保存</button><button class="btn btn-outline" onclick="closeGeneralModal()">取消</button></div>`;
+            document.getElementById('generalModal').classList.remove('hidden');
+        }
+
+        function addSchedule() {
+            const title = document.getElementById('schedTitle').value.trim();
+            const type = document.getElementById('schedType').value;
+            const date = document.getElementById('schedDate').value;
+            const time = document.getElementById('schedTime').value;
+            const description = document.getElementById('schedDesc').value.trim();
+            if (!title || !date) { toast('请填写标题和日期', 'error'); return; }
+            const db = getDB();
+            db.schedules.push({ id: genId(), title, type, date, time, description });
+            saveDB(db);
+            closeGeneralModal();
+            renderAll();
+            toast('✅ 日程已添加', 'success');
+        }
+
+        function deleteSchedule(id) {
+            if (!confirm('确定删除？')) return;
+            const db = getDB();
+            db.schedules = db.schedules.filter(s => s.id !== id);
+            saveDB(db);
+            renderAll();
+            toast('已删除');
+        }
+
+        // ==================== 成绩页面 ====================
+        function renderGradesPage(m) {
+            const db = getDB();
+            const canEdit = currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin');
+            const visibleGrades = currentUser?.role === 'admin' ? db.grades : currentUser?.role === 'teacher' ? db.grades : currentUser?.role === 'student' ? db.grades.filter(g => g.studentId === currentUser.studentId) : currentUser?.role === 'parent' ? db.grades.filter(g => g.studentId === db.users.find(u => u.id === currentUser.id)?.linkedStudent) : [];
+            m.innerHTML = `
+            <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0"><i class="fas fa-chart-bar"></i> 成绩管理</h3>${canEdit?`<button class="btn btn-primary btn-sm" onclick="showGradeModal()"><i class="fas fa-plus"></i> 录入</button>`:''}</div></div>
+            ${canEdit?`<div class="card" style="overflow-x:auto"><table><thead><tr><th>学生</th><th>科目</th><th>成绩</th><th>满分</th><th>日期</th><th>操作</th></tr></thead><tbody>${db.grades.length===0?'<tr><td colspan="6" style="text-align:center;opacity:.5">暂无成绩</td></tr>':db.grades.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(g=>`<tr><td>${g.studentName}</td><td>${g.subject}</td><td><strong>${g.score}</strong></td><td>${g.maxScore||100}</td><td>${g.date}</td><td><button class="btn btn-danger btn-sm" onclick="deleteGrade('${g.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table></div>`:`<div class="grid grid-2">${visibleGrades.length===0?'<div class="card" style="text-align:center;opacity:.5">暂无你的成绩</div>':visibleGrades.map(g=>`<div class="card" style="text-align:center"><h4>${g.subject}</h4><h2 style="font-size:2.5rem;background:var(--ps-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${g.score}</h2><p style="opacity:.6">满分：${g.maxScore||100} · ${g.date}</p></div>`).join('')}</div>`}`;
+        }
+
+        function showGradeModal() {
+            const db = getDB();
+            const students = db.users.filter(u => u.role === 'student');
+            document.getElementById('generalModalContent').innerHTML = `
+                <h3>   录入成绩</h3><label>学生</label><select id="gradeStudent">${students.map(s=>`<option value="${s.id}">${s.name||s.username} (${s.studentId||''})</option>`).join('')}</select><label>科目</label><input type="text" id="gradeSubject" placeholder="数学"><label>成绩</label><input type="number" id="gradeScore" placeholder="分数" min="0"><label>满分</label><input type="number" id="gradeMax" value="100" min="1"><label>日期</label><input type="date" id="gradeDate">
+                <div class="modal-actions"><button class="btn btn-primary" onclick="addGrade()">保存</button><button class="btn btn-outline" onclick="closeGeneralModal()">取消</button></div>`;
+            document.getElementById('generalModal').classList.remove('hidden');
+        }
+
+        function addGrade() {
+            const studentId = document.getElementById('gradeStudent').value;
+            const subject = document.getElementById('gradeSubject').value.trim();
+            const score = parseFloat(document.getElementById('gradeScore').value);
+            const maxScore = parseFloat(document.getElementById('gradeMax').value) || 100;
+            const date = document.getElementById('gradeDate').value;
+            if (!subject || isNaN(score) || !date) { toast('请填写完整', 'error'); return; }
+            const db = getDB();
+            const student = db.users.find(u => u.id === studentId);
+            db.grades.push({ id: genId(), studentId, studentName: student?.name || student?.username, subject, score, maxScore, date });
+            saveDB(db);
+            closeGeneralModal();
+            renderAll();
+            toast('✅ 成绩已录入', 'success');
+        }
+
+        function deleteGrade(id) {
+            if (!confirm('确定删除？')) return;
+            const db = getDB();
+            db.grades = db.grades.filter(g => g.id !== id);
+            saveDB(db);
+            renderAll();
+            toast('已删除');
+        }
+
+        // ==================== 文件页面 ====================
+        function renderFilesPage(m) {
+            const db = getDB();
+            m.innerHTML = `
+            <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0"><i class="fas fa-folder-open"></i> 文件共享</h3>${currentUser?`<button class="btn btn-primary btn-sm" onclick="showUploadModal()"><i class="fas fa-upload"></i> 上传</button>`:''}</div></div>
+            <div class="grid grid-3">${db.files.length===0?'<div class="card" style="text-align:center;opacity:.5">暂无共享文件</div>':db.files.map(f=>`<div class="card" style="text-align:center"><i class="fas fa-file" style="font-size:2rem;opacity:.5;margin-bottom:.5rem"></i><h4>${f.name}</h4><p style="font-size:.75rem;opacity:.5">   ${f.uploaderName} · ${new Date(f.time).toLocaleDateString()}</p><p style="font-size:.7rem;opacity:.4">${(f.size/1024).toFixed(1)} KB</p><a href="${f.url}" download="${f.name}" class="btn btn-outline btn-sm" style="margin-top:.3rem"><i class="fas fa-download"></i> 下载</a>${currentUser?.role==='teacher'||currentUser?.role==='admin'?`<button class="btn btn-danger btn-sm" style="margin-top:.3rem" onclick="deleteFile('${f.id}')"><i class="fas fa-trash"></i></button>`:''}</div>`).join('')}</div>`;
+        }
+
+        function showUploadModal() {
+            document.getElementById('generalModalContent').innerHTML = `
+                <h3>   上传文件</h3><div class="file-upload-area" onclick="document.getElementById('fileUploadInput').click()"><i class="fas fa-cloud-upload-alt"></i><p>点击选择文件</p><input type="file" id="fileUploadInput" style="display:none" onchange="previewFile(event)"></div><p id="filePreview" style="font-size:.8rem;opacity:.6;margin:.5rem 0"></p>
+                <div class="modal-actions"><button class="btn btn-primary" onclick="uploadFile()">上传</button><button class="btn btn-outline" onclick="closeGeneralModal()">取消</button></div>`;
+            document.getElementById('generalModal').classList.remove('hidden');
+            window._pendingUploadFile = null;
+        }
+
+        function previewFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            window._pendingUploadFile = file;
+            document.getElementById('filePreview').textContent = `已选择：${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+        }
+
+        function uploadFile() {
+            const file = window._pendingUploadFile;
+            if (!file) { toast('请选择文件', 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const db = getDB();
+                db.files.push({ id: genId(), name: file.name, size: file.size, url: e.target.result, uploaderId: currentUser.id, uploaderName: getCurrentUserName() || currentUser.username, time: new Date().toISOString() });
+                saveDB(db);
+                closeGeneralModal();
+                renderAll();
+                toast('✅ 上传成功', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function deleteFile(id) {
+            if (!confirm('确定删除？')) return;
+            const db = getDB();
+            db.files = db.files.filter(f => f.id !== id);
+            saveDB(db);
+            renderAll();
+            toast('已删除');
+        }
+
+        // ==================== 支持页面 ====================
+        function renderSupportPage(m) {
+            m.innerHTML = `<div class="card"><h3>   帮助与支持</h3><p>   班主任：张老师</p><p>   010-12345678</p><p>   class2@school.com</p><div class="info-banner"><i class="fas fa-lightbulb"></i>    管理员：admin / class2admin2024 |    主机端：host / class2host2024<br>这两个账号为预装账号，无法通过注册获取。</div></div>`;
+        }
+
+        // ==================== 搜索页面 ====================
+        function renderSearchPage(m) {
+            if (!searchResults) { navigateTo('home'); return; }
+            const r = searchResults;
+            m.innerHTML = `
+            <div class="card"><h3>   搜索结果："${r.query}"</h3></div>
+            ${r.posts.length>0?`<div class="card"><h4>   帖子 (${r.posts.length})</h4>${r.posts.map(p=>`<p style="cursor:pointer" onclick="showPostDetail('${p.id}')"><strong>${p.title}</strong> - ${p.authorName}</p>`).join('')}</div>`:''}
+            ${r.schedules.length>0?`<div class="card"><h4>   日程 (${r.schedules.length})</h4>${r.schedules.map(s=>`<p>${s.date} - ${s.title}</p>`).join('')}</div>`:''}
+            ${r.files.length>0?`<div class="card"><h4>   文件 (${r.files.length})</h4>${r.files.map(f=>`<p>${f.name}</p>`).join('')}</div>`:''}
+            ${r.grades.length>0?`<div class="card"><h4>   成绩 (${r.grades.length})</h4>${r.grades.map(g=>`<p>${g.studentName} - ${g.subject}: ${g.score}</p>`).join('')}</div>`:''}
+            ${r.users.length>0?`<div class="card"><h4>   用户 (${r.users.length})</h4>${r.users.map(u=>`<p>${u.name||u.username} · ${roleName(u.role)}</p>`).join('')}</div>`:''}
+            ${r.posts.length===0&&r.schedules.length===0&&r.files.length===0&&r.grades.length===0&&r.users.length===0?'<div class="card" style="text-align:center;opacity:.5">未找到相关结果</div>':''}`;
+        }
+
+        // ==================== 认证系统 ====================
+        function openAuth(mode) {
+            authMode = mode;
+            document.getElementById('authTitle').textContent = mode === 'login' ? '   登录' : '   注册';
+            document.getElementById('toggleAuthText').textContent = mode === 'login' ? '还没有账号？去注册' : '已有账号？去登录';
+            document.getElementById('identitySelect').innerHTML = `
+                <option value="teacher">  ‍   老师（含班主任）</option>
+                <option value="parent">  ‍  ‍   家长</option>
+                <option value="student">   学生</option>`;
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('usernameInput').focus();
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function toggleAuthMode() {
+            authMode = authMode === 'login' ? 'register' : 'login';
+            openAuth(authMode);
+        }
+
+        function handleAuth() {
+            const identity = document.getElementById('identitySelect').value;
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            if (username === PRESET_ADMIN.username || username === PRESET_HOST.username) {
+                toast('⚠️ 该账号为管理员/主机端专用，请使用  按钮登录', 'error');
+                return;
+            }
+            if (!username || !password) { toast('⚠️ 请填写完整', 'error'); return; }
+            if (username.length < 3 || password.length < 4) { toast('⚠️ 用户名≥3字符，密码≥4字符', 'error'); return; }
+            const db = getDB();
+            if (authMode === 'register') {
+                if (db.users.find(u => u.username === username)) { toast('⚠️ 用户名已存在', 'error'); return; }
+                db.users.push({ id: genId(), username, password, role: identity, name: username, studentId: identity === 'student' ? `A${Math.floor(Math.random()*26)+1}` : undefined });
+                saveDB(db);
+                toast('✅ 注册成功！', 'success');
+                closeAuthModal();
+                openAuth('login');
+            } else {
+                const u = db.users.find(u => u.username === username && u.password === password && u.role === identity);
+                if (!u) { toast('❌ 用户名、密码或身份不匹配', 'error'); return; }
+                currentUser = { id: u.id, username: u.username, role: u.role, studentId: u.studentId };
+                saveCU();
+                conversationHistory = [];
+                closeAuthModal();
+                renderAll();
+                toast(`   欢迎，${u.name||u.username}！`, 'success');
+            }
+        }
+
+        function openAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+            document.getElementById('adminUsernameInput').focus();
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+            document.getElementById('adminUsernameInput').value = '';
+            document.getElementById('adminPasswordInput').value = '';
+        }
+
+        function handleAdminLogin() {
+            const username = document.getElementById('adminUsernameInput').value.trim();
+            const password = document.getElementById('adminPasswordInput').value.trim();
+            if (!username || !password) { toast('⚠️ 请填写完整', 'error'); return; }
+            const db = getDB();
+            if (username === PRESET_ADMIN.username && password === PRESET_ADMIN.password) {
+                const u = db.users.find(u => u.id === 'admin001');
+                currentUser = { id: u.id, username: u.username, role: 'admin', name: u.name };
+                saveCU();
+                conversationHistory = [];
+                closeAdminLoginModal();
+                renderAll();
+                toast('   欢迎，管理员！', 'success');
+                return;
+            }
+            if (username === PRESET_HOST.username && password === PRESET_HOST.password) {
+                const u = db.users.find(u => u.id === 'host001');
+                currentUser = { id: u.id, username: u.username, role: 'host', name: u.name };
+                saveCU();
+                conversationHistory = [];
+                closeAdminLoginModal();
+                renderAll();
+                toast('   班级电脑已登录！', 'success');
+                return;
+            }
+            toast('❌ 管理员/主机端账号密码错误', 'error');
+        }
+
+        function logout() {
+            if (confirm('确定退出？')) {
+                currentUser = null;
+                conversationHistory = [];
+                saveCU();
+                renderAll();
+                toast('   已退出');
+            }
+        }
+
+        function closeGeneralModal() { document.getElementById('generalModal').classList.add('hidden'); }
+
+        // ==================== 事件绑定 ====================
+        document.getElementById('mainNav').addEventListener('click', function(e) {
+            const a = e.target.closest('a');
+            if (!a) return;
+            e.preventDefault();
+            const p = a.dataset.page;
+            if (p) navigateTo(p);
+        });
+        document.getElementById('authModal').addEventListener('click', function(e) { if (e.target === this) closeAuthModal(); });
+        document.getElementById('adminLoginModal').addEventListener('click', function(e) { if (e.target === this) closeAdminLoginModal(); });
+        document.getElementById('generalModal').addEventListener('click', function(e) { if (e.target === this) closeGeneralModal(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('authModal').classList.contains('hidden')) closeAuthModal();
+                if (!document.getElementById('adminLoginModal').classList.contains('hidden')) closeAdminLoginModal();
+                if (!document.getElementById('generalModal').classList.contains('hidden')) closeGeneralModal();
+            }
+        });
+
+        // ==================== 启动 ====================
+        renderAll();
+        console.log('   2班 · 智慧班级平台 v8.0 已就绪');
+        console.log('   管理员：admin / class2admin2024');
+        console.log('   主机端：host / class2host2024');
+        console.log('   以上账号无法通过普通注册获取');
+        console.log('   普通测试：teacher1 / student1 / parent1 密码：123456');
+    </script>
+</body>
+</html>
