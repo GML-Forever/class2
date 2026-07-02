@@ -1548,7 +1548,59 @@
         }
 
         // ==================== 随机抽选页面 ====================
-      <!DOCTYPE html>
+        function renderRandomPage(m) {
+            if (!['host', 'admin'].includes(currentUser.role)) { navigateTo('home'); return; }
+            const classA = Array.from({ length: 26 }, (_, i) => `A${i+1}`);
+            const classB = Array.from({ length: 25 }, (_, i) => `B${i+1}`);
+            m.innerHTML = `
+            <div class="card" style="text-align:center">
+                <h3>🎲 随机抽选</h3>
+                <select id="randomGroup" style="width:auto;margin:1rem"><option value="A">A班</option><option value="B">B班</option><option value="all">全班</option></select>
+                <button class="btn btn-primary" onclick="doRandomPick()">抽取</button>
+                <div id="randomResult" style="font-size:3rem;font-weight:900;margin-top:1rem;font-family:'Space Grotesk',sans-serif;background:var(--ps-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">?</div>
+            </div>`;
+            window._doRandomPick = function() {
+                const s = document.getElementById('randomGroup');
+                const pool = s.value === 'A' ? classA : s.value === 'B' ? classB : [...classA, ...classB];
+                document.getElementById('randomResult').textContent = pool[Math.floor(Math.random() * pool.length)];
+            };
+        }
+
+        function doRandomPick() { if (window._doRandomPick) window._doRandomPick(); }
+
+        // ==================== 事件绑定 ====================
+        document.getElementById('generalModal').addEventListener('click', function(e) { if (e.target === this) closeGeneralModal(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('generalModal').classList.contains('hidden')) closeGeneralModal();
+        });
+
+        // ==================== 初始化 ====================
+        function init() {
+            if (currentUser) {
+                document.getElementById('fullscreenLogin').classList.add('hidden');
+                document.getElementById('mainApp').style.display = 'flex';
+                renderAll();
+            } else {
+                document.getElementById('fullscreenLogin').classList.remove('hidden');
+                document.getElementById('mainApp').style.display = 'none';
+                loginMode = 'login';
+                toggleLoginMode();
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
+
+获取 Outlook for iOS
+发件人: 学者 <719563585@qq.com>
+发送时间: Wednesday, 01 July 2026 21:50:35
+收件人: 龙 王 <lucaswang1329@outlook.com>
+主题: C2IG 26.7
+ 
+C2IG 26.7.html
+
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -1811,7 +1863,7 @@
             justify-content: center;
             font-size: 4rem;
             font-weight: bold;
-            box-shadow: 
+            box-shadow:
                 0 0 60px rgba(52, 152, 219, 0.3),
                 inset 0 0 60px rgba(255,255,255,0.1);
             position: relative;
@@ -1973,17 +2025,17 @@
             .main-content {
                 flex-direction: column;
             }
-            
+           
             .draw-section {
                 width: 100%;
             }
-            
+           
             .draw-circle {
                 width: 200px;
                 height: 200px;
                 font-size: 3rem;
             }
-            
+           
             .range-selector h1 {
                 font-size: 2rem;
             }
@@ -2100,23 +2152,23 @@
         function selectRange(range) {
             currentRange = range;
             students = generateStudents(range);
-            
+           
             // 更新显示文本
             let displayText = '';
             if (range === 'A') displayText = 'Class A (A1~A26)';
             else if (range === 'B') displayText = 'Class B (B1~B25)';
             else displayText = 'Whole Class (A1~A26 + B1~B25)';
             document.getElementById('rangeDisplay').textContent = displayText;
-            
+           
             // 重置状态
             selectedStudents = new Set(students);
             excludedStudents = new Set();
             history = [];
             updateHistoryDisplay();
-            
+           
             // 生成学号网格
             renderStudents();
-            
+           
             // 切换页面
             document.getElementById('rangeSelector').style.display = 'none';
             document.getElementById('drawPanel').style.display = 'block';
@@ -2133,26 +2185,26 @@
         function renderStudents() {
             const grid = document.getElementById('studentsGrid');
             grid.innerHTML = '';
-            
+           
             students.forEach(id => {
                 const div = document.createElement('div');
                 div.className = 'student-item';
                 div.textContent = id;
                 div.dataset.id = id;
-                
+               
                 if (selectedStudents.has(id)) {
                     div.classList.add('selected');
                 }
                 if (excludedStudents.has(id)) {
                     div.classList.add('excluded');
                 }
-                
+               
                 // 点击选择/取消
                 div.addEventListener('click', (e) => {
                     if (excludedStudents.has(id)) return;
                     toggleStudent(id);
                 });
-                
+               
                 // 长按功能（3秒）
                 div.addEventListener('mousedown', (e) => startLongPress(id, div));
                 div.addEventListener('touchstart', (e) => startLongPress(id, div), {passive: true});
@@ -2160,7 +2212,7 @@
                 div.addEventListener('touchend', (e) => endLongPress(id, div));
                 div.addEventListener('mouseleave', () => cancelLongPress());
                 div.addEventListener('touchcancel', () => cancelLongPress());
-                
+               
                 grid.appendChild(div);
             });
         }
@@ -2168,7 +2220,7 @@
         // 切换学号选择状态
         function toggleStudent(id) {
             if (excludedStudents.has(id)) return;
-            
+           
             const div = document.querySelector(`[data-id="${id}"]`);
             if (selectedStudents.has(id)) {
                 selectedStudents.delete(id);
@@ -2182,25 +2234,25 @@
         // 长按开始
         function startLongPress(id, div) {
             if (excludedStudents.has(id)) return;
-            
+           
             // 获取当前可选的学号数量（排除已排除的）
             const availableCount = students.filter(s => !excludedStudents.has(s)).length;
             if (availableCount < 3) return; // 需要至少3个才能触发
-            
+           
             longPressTimer = setTimeout(() => {
                 // 标记为排除（从选中状态中移除，但不改变视觉样式）
                 excludedStudents.add(id);
                 selectedStudents.delete(id);
                 div.classList.add('excluded');
                 // 注意：不再移除 selected 类，保持外观不变
-                
+               
                 // 屏幕边框变红闪烁
                 const flash = document.getElementById('screenFlash');
                 flash.classList.add('active');
                 setTimeout(() => {
                     flash.classList.remove('active');
                 }, 300);
-                
+               
                 longPressTimer = null;
             }, 3000);
         }
@@ -2270,19 +2322,19 @@
         function startDraw() {
             const availableStudents = Array.from(selectedStudents).filter(id => !excludedStudents.has(id));
             if (availableStudents.length === 0) return;
-            
+           
             isDrawing = true;
             const btn = document.getElementById('actionBtn');
             const circle = document.getElementById('drawCircle');
-            
+           
             btn.textContent = 'Stop';
             btn.classList.remove('start');
             btn.classList.add('stop');
             circle.classList.add('rolling');
             circle.classList.remove('winner');
-            
+           
             startTime = performance.now();
-            
+           
             if (currentMode === 'auto') {
                 // Auto模式：5秒内由快至慢，初始速度与Manual相同
                 animateAuto(availableStudents);
@@ -2297,13 +2349,13 @@
         function animateAuto(availableStudents) {
             const duration = 5000; // 5秒总时长
             const circle = document.getElementById('drawCircle');
-            
+           
             function step(currentTime) {
                 if (!isDrawing) return;
-                
+               
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                
+               
                 // 计算当前间隔时间（由快到慢）
                 // 初始间隔 = BASE_SPEED (50ms，与Manual相同)
                 // 最终间隔 = 500ms（缓慢停止）
@@ -2311,11 +2363,11 @@
                 const initialInterval = BASE_SPEED;
                 const finalInterval = 500;
                 const currentInterval = initialInterval + (finalInterval - initialInterval) * Math.pow(progress, 2);
-                
+               
                 // 显示随机学号
                 const randomIndex = Math.floor(Math.random() * availableStudents.length);
                 circle.textContent = availableStudents[randomIndex];
-                
+               
                 if (progress < 1) {
                     // 继续动画，根据当前速度设置下一帧
                     drawTimeout = setTimeout(() => {
@@ -2326,34 +2378,34 @@
                     stopDraw();
                 }
             }
-            
+           
             animationFrame = requestAnimationFrame((time) => step(time));
         }
 
         // Manual模式动画 - 匀速快速滚动（固定BASE_SPEED）
         function animateManual(availableStudents) {
             const circle = document.getElementById('drawCircle');
-            
+           
             function step() {
                 if (!isDrawing) return;
-                
+               
                 const randomIndex = Math.floor(Math.random() * availableStudents.length);
                 circle.textContent = availableStudents[randomIndex];
-                
+               
                 drawTimeout = setTimeout(() => {
                     animationFrame = requestAnimationFrame(step);
                 }, BASE_SPEED); // 固定使用BASE_SPEED（50ms）
             }
-            
+           
             animationFrame = requestAnimationFrame(step);
         }
 
         // 停止抽选
         function stopDraw() {
             if (!isDrawing) return;
-            
+           
             isDrawing = false;
-            
+           
             // 清除所有定时器
             if (drawTimeout) {
                 clearTimeout(drawTimeout);
@@ -2363,16 +2415,16 @@
                 cancelAnimationFrame(animationFrame);
                 animationFrame = null;
             }
-            
+           
             const btn = document.getElementById('actionBtn');
             const circle = document.getElementById('drawCircle');
-            
+           
             btn.textContent = 'Start';
             btn.classList.remove('stop');
             btn.classList.add('start');
             circle.classList.remove('rolling');
             circle.classList.add('winner');
-            
+           
             // 记录历史
             const winner = circle.textContent;
             if (winner && winner !== '?' && !history.includes(winner)) {
@@ -2386,10 +2438,10 @@
         function updateHistoryDisplay() {
             const list = document.getElementById('historyList');
             const count = document.getElementById('historyCount');
-            
+           
             count.textContent = `(${history.length}/51)`;
             list.innerHTML = '';
-            
+           
             history.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
@@ -2402,7 +2454,7 @@
         function toggleHistory() {
             const list = document.getElementById('historyList');
             const toggle = document.getElementById('historyToggle');
-            
+           
             list.classList.toggle('collapsed');
             toggle.classList.toggle('collapsed');
         }
