@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2班 · 智慧班级平台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ps-blue: #003791;
+            --ps-light-blue: #2d6bd6;
+            --ps-cyan: #00B4D8;
+            --ps-white: #FFFFFF;
+            --ps-dark: #0c0c14;
+            --ps-bg: #14141e;
+            --ps-card: rgba(255, 255, 255, 0.04);
+            --ps-card-hover: rgba(255, 255, 255, 0.08);
+            --ps-border: rgba(255, 255, 255, 0.06);
+            --ps-text: #FFFFFF;
+            --ps-text-secondary: rgba(255, 255, 255, 0.5);
+            --ps-gradient: linear-gradient(135deg, #003791 0%, #2d6bd6 50%, #00B4D8 100%);
+            --ps-glow: 0 0 60px rgba(0, 55, 145, 0.4);
+            --ps-radius: 24px;
+            --ps-radius-sm: 16px;
+            --ps-transition: cubic-bezier(0.32, 0.94, 0.60, 1.0);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'SF Pro Display', -apple-system, sans-serif;
+            background: var(--ps-dark);
+            color: var(--ps-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            letter-spacing: -0.01em;
+        }
+
+        /* ===== 背景图片 + 虚化 ===== */
+        .ps5-background {
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; 
+            height: 100%;
+            z-index: 0; 
+            pointer-events: none; 
+            overflow: hidden;
+        }
+        .ps5-bg-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('https://image.api.playstation.com/pr/bam-art/132/370/f848a5dc-7e46-4125-972e-cfe1b2cd673f.jpg') center/cover no-repeat;
+            filter: blur(6px) brightness(0.7);
+            transform: scale(1.05); /* 防止边缘露出 */
+        }
+        /* 叠加一层半透明深色，让内容更清晰 */
+        .ps5-bg-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 18, 0.45);
+        }
+
+        /* 移除之前动态粒子 / 渐变，保留干净背景 */
+        .ps5-particles, .ps5-bg-gradient, .ps5-ripple { display: none; }
+
+        .app-container { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* ========== PS5 顶部导航栏 ========== */
+        .ps5-top-nav {
+            position: sticky; top: 20px; z-index: 100; margin: 0 auto;
+            max-width: 95%; background: rgba(20,20,30,0.6);
+            backdrop-filter: blur(40px) saturate(200%);
+            -webkit-backdrop-filter: blur(40px) saturate(200%);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 30px; padding: 0.5rem 1.5rem;
+            display: flex; align-items: center; justify-content: center;
+            gap: 1.5rem; transition: all 0.4s var(--ps-transition);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+        .ps5-nav-icon {
+            display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+            cursor: pointer; transition: all 0.35s var(--ps-transition);
+            position: relative; padding: 0.5rem 0.7rem; border-radius: 18px;
+            min-width: 70px; background: transparent;
+        }
+        .ps5-nav-icon .icon-square {
+            width: 50px; height: 50px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 400;
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.5);
+            transition: all 0.4s var(--ps-transition);
+            border: 1px solid transparent;
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+        }
+        .ps5-nav-icon .icon-label {
+            font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.4);
+            opacity: 0; transform: translateY(-8px);
+            transition: all 0.4s var(--ps-transition);
+            white-space: nowrap; letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .ps5-nav-icon:hover .icon-square {
+            background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8);
+            transform: translateY(-3px); border-color: rgba(255,255,255,0.1);
+        }
+        .ps5-nav-icon:hover .icon-label { opacity: 0.8; transform: translateY(0); }
+        .ps5-nav-icon.active .icon-square {
+            background: var(--ps-gradient); color: #fff; border-color: transparent;
+            transform: scale(1.18); box-shadow: var(--ps-glow);
+            width: 58px; height: 58px; border-radius: 18px; font-size: 1.7rem;
+        }
+        .ps5-nav-icon.active .icon-label { opacity: 1; transform: translateY(0); color: #fff; font-weight: 700; }
+        .ps5-nav-icon.active::before {
+            content: ''; position: absolute; bottom: -2px; width: 40px; height: 3px;
+            background: var(--ps-gradient); border-radius: 3px;
+        }
+
+        .nav-actions { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+        .ps5-search {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 30px; padding: 0.5rem 1rem; display: flex; align-items: center;
+            gap: 0.5rem; color: rgba(255,255,255,0.4); transition: all 0.3s;
+        }
+        .ps5-search:focus-within {
+            background: rgba(255,255,255,0.08); border-color: var(--ps-light-blue);
+            box-shadow: 0 0 20px rgba(0,112,204,0.2);
+        }
+        .ps5-search input {
+            border: none; background: transparent; outline: none;
+            color: #fff; font-size: 0.85rem; width: 120px; font-family: inherit;
+        }
+        .ps5-search input::placeholder { color: rgba(255,255,255,0.3); }
+        .ps5-search-icon { font-size: 1rem; opacity: 0.5; }
+
+        .ps5-btn {
+            border: none; padding: 0.6rem 1.5rem; border-radius: 30px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s var(--ps-transition);
+            font-size: 0.85rem; font-family: inherit; letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .ps5-btn-primary { background: var(--ps-gradient); color: #fff; box-shadow: 0 4px 20px rgba(0,55,145,0.5); }
+        .ps5-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,55,145,0.7); }
+        .ps5-btn-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.15); }
+        .ps5-btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.3); }
+        .ps5-btn-sm { padding: 0.4rem 1rem; font-size: 0.75rem; }
+        .ps5-btn-logout {
+            background: transparent; border: none; color: rgba(255,255,255,0.4);
+            cursor: pointer; font-weight: 600; font-size: 0.8rem;
+            padding: 0.4rem 0.8rem; border-radius: 20px; transition: all 0.3s;
+        }
+        .ps5-btn-logout:hover { color: #ff4757; background: rgba(255,71,87,0.1); }
+
+        /* ========== 主内容区 ========== */
+        .main-container { display: flex; flex: 1; overflow: hidden; padding: 1.5rem; gap: 1.5rem; }
+        .content-area { flex: 1; overflow-y: auto; padding: 0.5rem; }
+        .content-area::-webkit-scrollbar { width: 4px; }
+        .content-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        /* ========== PS5 卡片 ========== */
+        .ps5-card {
+            background: var(--ps-card); backdrop-filter: blur(30px);
+            border: 1px solid var(--ps-border); border-radius: var(--ps-radius);
+            padding: 2rem; margin-bottom: 1.2rem; transition: all 0.4s var(--ps-transition);
+            animation: ps5CardIn 0.5s var(--ps-transition) both;
+            position: relative; overflow: hidden;
+        }
+        .ps5-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+        @keyframes ps5CardIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .ps5-card:hover {
+            background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5); transform: translateY(-3px);
+        }
+        .ps5-card h2 {
+            font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;
+            background: var(--ps-gradient); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .ps5-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.8rem; }
+        .ps5-card p { color: var(--ps-text-secondary); line-height: 1.6; }
+
+        /* ========== PS5 Hero ========== */
+        .ps5-hero {
+            background: linear-gradient(160deg, rgba(0,55,145,0.5) 0%, rgba(0,112,204,0.3) 40%, rgba(0,180,216,0.15) 100%);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 32px;
+            padding: 3rem 2.5rem; margin-bottom: 1.5rem; position: relative;
+            overflow: hidden; backdrop-filter: blur(30px);
+        }
+        .ps5-hero::after {
+            content: ''; position: absolute; top: -30%; right: -10%; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .ps5-hero h1 {
+            font-size: 2.5rem; font-weight: 900; margin-bottom: 0.5rem;
+            background: var(--ps-gradient); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
+            letter-spacing: -0.02em;
+        }
+        .ps5-hero .subtitle { font-size: 1.1rem; opacity: 0.6; margin-bottom: 1.5rem; }
+        .ps5-hero .stats { display: flex; gap: 2.5rem; flex-wrap: wrap; }
+        .ps5-stat { text-align: center; }
+        .ps5-stat .stat-num { font-size: 2.2rem; font-weight: 900; font-family: 'Space Grotesk', sans-serif; background: var(--ps-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .ps5-stat .stat-label { font-size: 0.8rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* ========== 模块网格 ========== */
+        .ps5-module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem; }
+        .ps5-module {
+            background: var(--ps-card); backdrop-filter: blur(30px);
+            border: 1px solid var(--ps-border); border-radius: var(--ps-radius);
+            overflow: hidden; transition: all 0.4s var(--ps-transition);
+            cursor: pointer;
+        }
+        .ps5-module:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .ps5-module-header { padding: 1.5rem 1.8rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--ps-border); }
+        .ps5-module-icon {
+            width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; font-size: 1.4rem;
+        }
+        .ps5-module-icon.blue { background: rgba(0,112,204,0.2); color: var(--ps-light-blue); }
+        .ps5-module-icon.cyan { background: rgba(0,180,216,0.2); color: var(--ps-cyan); }
+        .ps5-module-icon.green { background: rgba(16,185,129,0.2); color: var(--success); }
+        .ps5-module-icon.orange { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .ps5-module-icon.red { background: rgba(239,68,68,0.2); color: var(--danger); }
+        .ps5-module-body { padding: 1.2rem 1.8rem; }
+        .ps5-module-footer {
+            padding: 1rem 1.8rem; border-top: 1px solid var(--ps-border);
+            display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.5;
+        }
+
+        /* ========== 输入框 ========== */
+        select, input[type="text"], input[type="date"], textarea {
+            padding: 0.8rem 1rem; border-radius: 14px; border: 1.5px solid var(--ps-border);
+            font-family: inherit; font-size: 0.9rem; background: rgba(255,255,255,0.03);
+            color: #fff; transition: all 0.3s; width: 100%;
+        }
+        textarea { resize: vertical; min-height: 100px; }
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--ps-light-blue); box-shadow: 0 0 20px rgba(0,112,204,0.15); background: rgba(255,255,255,0.06); }
+        select option { background: var(--ps-dark); color: #fff; }
+
+        .ps5-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.2rem; }
+        .ps5-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+
+        /* ========== 考试模式 ========== */
+        .exam-fullscreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;
+            background: #080810; display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .exam-fullscreen.show { display: flex; }
+        .exam-subject-display { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: rgba(255,255,255,0.5); letter-spacing: 3px; text-transform: uppercase; }
+        .exam-time-display { font-size: 1.2rem; color: rgba(255,255,255,0.4); margin-bottom: 3rem; letter-spacing: 2px; }
+        .exam-big-clock {
+            font-size: 14vw; font-weight: 200; font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -6px; color: #fff; line-height: 1;
+            text-shadow: 0 0 150px rgba(0,180,216,0.4);
+        }
+        .exam-date-display { font-size: 1.5rem; color: rgba(255,255,255,0.3); margin-top: 1.5rem; }
+        .exam-btn {
+            position: fixed; bottom: 40px; right: 40px; z-index: 2001;
+            padding: 12px 24px; border-radius: 30px; cursor: pointer;
+            font-size: 14px; font-family: inherit; font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.06); color: #fff;
+            transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .exam-btn:hover { background: rgba(255,255,255,0.15); }
+
+        /* ========== 随机抽选 ========== */
+        .draw-big-circle {
+            width: 220px; height: 220px; border-radius: 50%;
+            background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            border: 3px solid rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 4rem; font-weight: 900; margin: 20px auto;
+            font-family: 'Space Grotesk', sans-serif; transition: all 0.3s;
+        }
+        .draw-big-circle.rolling { animation: drawRoll 0.4s ease-in-out infinite; border-color: var(--ps-light-blue); box-shadow: 0 0 100px rgba(0,112,204,0.5); }
+        .draw-big-circle.winner { border-color: var(--success); box-shadow: 0 0 100px rgba(16,185,129,0.5); background: rgba(16,185,129,0.1); }
+        @keyframes drawRoll { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+        .student-grid-draw {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+            gap: 10px; max-height: 45vh; overflow-y: auto; padding: 12px;
+            background: rgba(0,0,0,0.3); border-radius: 20px; border: 1px solid var(--ps-border);
+        }
+        .student-cell-draw {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1);
+            border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        .student-cell-draw:hover { background: rgba(255,255,255,0.1); }
+        .student-cell-draw.selected { background: rgba(16,185,129,0.25); border-color: var(--success); }
+        .student-cell-draw.excluded { cursor: not-allowed; opacity: 0.4; }
+
+        /* ========== Toast ========== */
+        .ps5-toast {
+            position: fixed; top: 30px; right: 30px; z-index: 500;
+            background: rgba(30,30,40,0.9); color: #fff; padding: 1rem 1.5rem;
+            border-radius: 16px; font-weight: 600; font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px);
+            animation: ps5ToastIn 0.4s var(--ps-transition), ps5ToastOut 0.4s 2.5s forwards;
+        }
+        @keyframes ps5ToastIn { from { transform: translateX(120px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes ps5ToastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-15px); } }
+
+        /* ========== 模态框 ========== */
+        .ps5-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 300; animation: ps5FadeIn 0.3s;
+        }
+        .ps5-modal-overlay.hidden { display: none; }
+        @keyframes ps5FadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .ps5-modal {
+            background: #1a1a28; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 28px; padding: 2.5rem; width: 520px; max-width: 92vw;
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            animation: ps5ModalIn 0.4s var(--ps-transition);
+        }
+        @keyframes ps5ModalIn { from { transform: translateY(40px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        .ps5-modal h3 { font-size: 1.5rem; text-align: center; margin-bottom: 1.5rem; font-weight: 700; }
+        .ps5-modal label { font-weight: 600; font-size: 0.8rem; color: rgba(255,255,255,0.5); display: block; margin-top: 1rem; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 1px; }
+        .ps5-modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .ps5-modal-actions .ps5-btn { flex: 1; }
+
+        /* AI 聊天 */
+        .ai-chat-container {
+            display: flex; flex-direction: column; height: calc(100vh - 220px);
+            background: var(--ps-card); border: 1px solid var(--ps-border);
+            border-radius: var(--ps-radius); overflow: hidden;
+        }
+        .ai-chat-header { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--ps-border); display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); }
+        .ai-chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .ai-msg { padding: 1rem 1.2rem; border-radius: 18px; max-width: 75%; animation: ps5MsgIn 0.3s; }
+        @keyframes ps5MsgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .ai-msg.user { background: var(--ps-gradient); align-self: flex-end; border-bottom-right-radius: 6px; }
+        .ai-msg.ai { background: rgba(255,255,255,0.05); align-self: flex-start; border-bottom-left-radius: 6px; border: 1px solid var(--ps-border); }
+        .ai-input-area { padding: 1rem 1.5rem; border-top: 1px solid var(--ps-border); display: flex; gap: 0.8rem; background: rgba(0,0,0,0.2); }
+
+        @media(max-width:768px) {
+            .ps5-top-nav { gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 24px; }
+            .ps5-nav-icon .icon-square { width: 38px; height: 38px; font-size: 1.1rem; border-radius: 12px; }
+            .ps5-nav-icon.active .icon-square { width: 44px; height: 44px; font-size: 1.3rem; }
+            .ps5-nav-icon .icon-label { display: none; }
+            .main-container { padding: 0.8rem; }
+            .ps5-hero { padding: 2rem 1.5rem; }
+            .ps5-hero h1 { font-size: 1.8rem; }
+            .exam-big-clock { font-size: 20vw; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景：图片 + 虚化 + 半透明遮罩 -->
+    <div class="ps5-background">
+        <div class="ps5-bg-image"></div>
+        <div class="ps5-bg-overlay"></div>
+    </div>
+    <div id="toastContainer"></div>
+
+    <div class="app-container">
+        <!-- PS5 顶部导航栏 -->
+        <header class="ps5-top-nav">
+            <div class="ps5-nav-icon active" data-page="home" onclick="navigateTo('home')">
+                <div class="icon-square">⌂</div>
+                <span class="icon-label">Home</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="ai" onclick="navigateTo('ai')">
+                <div class="icon-square">◈</div>
+                <span class="icon-label">AI</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="community" onclick="navigateTo('community')">
+                <div class="icon-square">◉</div>
+                <span class="icon-label">Social</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="messages" onclick="navigateTo('messages')">
+                <div class="icon-square">◻</div>
+                <span class="icon-label">Chat</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="schedule" onclick="navigateTo('schedule')">
+                <div class="icon-square">◷</div>
+                <span class="icon-label">Calendar</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="attendance" onclick="navigateTo('attendance')">
+                <div class="icon-square">✓</div>
+                <span class="icon-label">Check</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="grades" onclick="navigateTo('grades')">
+                <div class="icon-square">≡</div>
+                <span class="icon-label">Grades</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="files" onclick="navigateTo('files')">
+                <div class="icon-square">⊞</div>
+                <span class="icon-label">Files</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="exam" onclick="navigateTo('exam')">
+                <div class="icon-square">◴</div>
+                <span class="icon-label">Exam</span>
+            </div>
+            <div class="ps5-nav-icon" data-page="random" onclick="navigateTo('random')">
+                <div class="icon-square">◐</div>
+                <span class="icon-label">Draw</span>
+            </div>
+            <div class="nav-actions">
+                <div class="ps5-search">
+                    <span class="ps5-search-icon">⌕</span>
+                    <input type="text" placeholder="Search" id="globalSearch" onkeypress="if(event.key==='Enter')performSearch()">
+                </div>
+                <button class="ps5-btn-logout" onclick="logout()">⏻</button>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <main class="content-area" id="mainContent"></main>
+        </div>
+    </div>
+
+    <!-- 考试模式 -->
+    <div class="exam-fullscreen" id="examFullscreen">
+        <div class="exam-subject-display" id="examSubject">Mathematics</div>
+        <div class="exam-time-display" id="examTimeRange">08:00 — 10:00</div>
+        <div class="exam-big-clock" id="examClock">--:--:--</div>
+        <div class="exam-date-display" id="examDate"></div>
+        <button class="exam-btn" onclick="showExamSettings()" style="right:120px">Settings</button>
+        <button class="exam-btn" onclick="exitExamMode()">Exit</button>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="ps5-modal-overlay hidden" id="generalModal">
+        <div class="ps5-modal" id="generalModalContent"></div>
+    </div>
+
+    <script>
+        // ==================== 数据库 ====================
+        const DB_KEY = 'class2_ps5_final';
+
+        function getDB() {
+            let db = localStorage.getItem(DB_KEY);
+            if (!db) {
+                db = JSON.stringify({
+                    messages: { class: [] },
+                    posts: [],
+                    schedules: [],
+                    grades: [],
+                    files: [],
+                    attendance: [],
+                    examSettings: { subject: 'Mathematics', startTime: '08:00', endTime: '10:00' },
+                    nextId: 1
+                });
+                localStorage.setItem(DB_KEY, db);
+            }
+            return JSON.parse(db);
+        }
+
+        function saveDB(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+        function genId() { const db = getDB();
+            db.nextId++;
+            saveDB(db); return 'id' + db.nextId; }
+
+        let currentPage = 'home';
+
+        function toast(m) {
+            const c = document.getElementById('toastContainer');
+            const d = document.createElement('div');
+            d.className = 'ps5-toast';
+            d.textContent = m;
+            c.appendChild(d);
+            setTimeout(() => d.remove(), 3000);
+        }
+
+        function renderAll() { renderMain();
+            updateNav(); }
+
+        function renderMain() {
+            const m = document.getElementById('mainContent'),
+                db = getDB();
+            const today = new Date().toISOString().split('T')[0];
+            const att = db.attendance.filter(a => a.date === today);
+
+            switch (currentPage) {
+                case 'home':
+                    m.innerHTML = `
+                    <div class="ps5-hero">
+                        <h1>Welcome Back</h1>
+                        <p class="subtitle">Class 2 · Smart Platform · ${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
+                        <div class="stats">
+                            <div class="ps5-stat"><div class="stat-num">${db.posts.length}</div><div class="stat-label">Posts</div></div>
+                            <div class="ps5-stat"><div class="stat-num">${att.length}</div><div class="stat-label">Today</div></div>
+                            <div class="ps5-stat"><div class="stat-num">${db.files.length}</div><div class="stat-label">Files</div></div>
+                            <div class="ps5-stat"><div class="stat-num">${db.schedules.length}</div><div class="stat-label">Events</div></div>
+                        </div>
+                    </div>
+                    <div class="ps5-module-grid">
+                        <div class="ps5-module" onclick="navigateTo('community')">
+                            <div class="ps5-module-header"><div class="ps5-module-icon blue">◉</div><h3 style="margin:0">Latest Posts</h3></div>
+                            <div class="ps5-module-body">${db.posts.slice(-3).reverse().map(p=>`<p style="margin:0.3rem 0;font-size:0.9rem">${p.title}</p>`).join('')||'<p style="opacity:0.4">No posts yet</p>'}</div>
+                            <div class="ps5-module-footer"><span>${db.posts.length} total</span><span style="color:var(--ps-light-blue)">View All →</span></div>
+                        </div>
+                        <div class="ps5-module" onclick="navigateTo('schedule')">
+                            <div class="ps5-module-header"><div class="ps5-module-icon red">◷</div><h3 style="margin:0">Upcoming</h3></div>
+                            <div class="ps5-module-body">${db.schedules.slice(0,3).map(s=>`<p style="margin:0.3rem 0;font-size:0.9rem">${s.date} — ${s.title}</p>`).join('')||'<p style="opacity:0.4">No events</p>'}</div>
+                            <div class="ps5-module-footer"><span>${db.schedules.length} events</span><span style="color:var(--ps-light-blue)">View All →</span></div>
+                        </div>
+                        <div class="ps5-module" onclick="navigateTo('attendance')">
+                            <div class="ps5-module-header"><div class="ps5-module-icon green">✓</div><h3 style="margin:0">Attendance</h3></div>
+                            <div class="ps5-module-body"><p style="font-size:2rem;font-weight:900;text-align:center">${att.length}</p><p style="text-align:center;opacity:0.5">checked in today</p></div>
+                            <div class="ps5-module-footer"><span>Tap to check in</span></div>
+                        </div>
+                        <div class="ps5-module" onclick="navigateTo('files')">
+                            <div class="ps5-module-header"><div class="ps5-module-icon cyan">⊞</div><h3 style="margin:0">Recent Files</h3></div>
+                            <div class="ps5-module-body">${db.files.slice(-3).map(f=>`<p style="margin:0.3rem 0;font-size:0.9rem">${f.name}</p>`).join('')||'<p style="opacity:0.4">No files</p>'}</div>
+                            <div class="ps5-module-footer"><span>${db.files.length} files</span><span style="color:var(--ps-light-blue)">View All →</span></div>
+                        </div>
+                    </div>`;
+                    break;
+                case 'ai':
+                    m.innerHTML = `
+                    <div class="ai-chat-container">
+                        <div class="ai-chat-header"><h3 style="margin:0">◈ C2 Intelligence</h3><span style="opacity:0.4;font-size:0.8rem">Ready</span></div>
+                        <div class="ai-chat-messages" id="aiMessages"><div class="ai-msg ai"><div style="opacity:0.5;font-size:0.7rem">C2</div><div>Hello. How can I help you today?</div></div></div>
+                        <div class="ai-input-area"><input type="text" id="aiInput" placeholder="Ask anything..." style="flex:1" onkeypress="if(event.key==='Enter')sendAiMsg()"><button class="ps5-btn ps5-btn-primary" onclick="sendAiMsg()">Send</button></div>
+                    </div>`;
+                    setTimeout(() => { const mb = document.getElementById('aiMessages'); if (mb) mb.scrollTop = mb.scrollHeight; }, 100);
+                    break;
+                case 'community':
+                    m.innerHTML = `
+                    <div class="ps5-card"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">◉ Community</h3><button class="ps5-btn ps5-btn-primary ps5-btn-sm" onclick="showNewPostModal()">+ New Post</button></div></div>
+                    <div class="ps5-grid-2">${db.posts.slice(-20).reverse().map(p=>`<div class="ps5-card"><h4>${p.title}</h4><p style="font-size:0.9rem;margin-top:0.5rem">${p.content}</p><p style="font-size:0.7rem;opacity:0.3;margin-top:0.8rem">${new Date(p.time).toLocaleString()}</p></div>`).join('')||'<div class="ps5-card" style="text-align:center;opacity:0.3">No posts yet</div>'}</div>`;
+                    break;
+                case 'messages':
+                    const msgs = db.messages['class'] || [];
+                    m.innerHTML = `
+                    <div class="ps5-card" style="display:flex;flex-direction:column;height:calc(100vh - 250px)">
+                        <h3 style="margin-bottom:1rem">◻ Class Chat</h3>
+                        <div style="flex:1;overflow-y:auto" id="msgList">${msgs.map(msg=>`<div style="padding:0.8rem;border-bottom:1px solid var(--ps-border)"><b style="font-size:0.85rem">${msg.sender}</b><span style="font-size:0.65rem;opacity:0.3;margin-left:0.8rem">${new Date(msg.time).toLocaleString()}</span><p style="font-size:0.9rem;margin-top:0.3rem">${msg.content}</p></div>`).join('')||'<p style="text-align:center;opacity:0.3;padding:3rem">No messages</p>'}</div>
+                        <div style="display:flex;gap:0.8rem;margin-top:1rem"><input type="text" id="msgInput" placeholder="Type a message..." style="flex:1"><button class="ps5-btn ps5-btn-primary" onclick="sendMsg()">Send</button></div>
+                    </div>`;
+                    break;
+                case 'schedule':
+                    m.innerHTML = `
+                    <div class="ps5-card"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">◷ Calendar</h3><button class="ps5-btn ps5-btn-primary ps5-btn-sm" onclick="showScheduleModal()">+ Add</button></div></div>
+                    <div class="ps5-grid-2">${db.schedules.sort((a,b)=>new Date(a.date)-new Date(b.date)).map(s=>`<div class="ps5-card"><h4>${s.title}</h4><p style="opacity:0.4;font-size:0.85rem">${s.date}</p></div>`).join('')||'<div class="ps5-card" style="text-align:center;opacity:0.3">No events</div>'}</div>`;
+                    break;
+                case 'attendance':
+                    m.innerHTML = `
+                    <div class="ps5-card" style="text-align:center"><h3>✓ Today's Attendance</h3><p style="font-size:4rem;font-weight:900;margin:1rem 0">${att.length}</p><p style="opacity:0.4">students checked in</p><button class="ps5-btn ps5-btn-primary" onclick="markAttendance()" style="margin-top:1rem">Check In</button></div>`;
+                    break;
+                case 'grades':
+                    m.innerHTML = `
+                    <div class="ps5-card"><h3>≡ Grades</h3></div>
+                    <div class="ps5-grid-2">${db.grades.map(g=>`<div class="ps5-card" style="text-align:center"><h4>${g.subject}</h4><p style="font-size:2.5rem;font-weight:900;background:var(--ps-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${g.score}</p></div>`).join('')||'<div class="ps5-card" style="text-align:center;opacity:0.3">No grades yet</div>'}</div>`;
+                    break;
+                case 'files':
+                    m.innerHTML = `
+                    <div class="ps5-card"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">⊞ Files</h3><button class="ps5-btn ps5-btn-primary ps5-btn-sm" onclick="showUploadModal()">+ Upload</button></div></div>
+                    <div class="ps5-grid-3">${db.files.map(f=>`<div class="ps5-card" style="text-align:center"><p style="font-size:2rem">⊞</p><p>${f.name}</p><p style="font-size:0.7rem;opacity:0.3">${(f.size/1024).toFixed(1)}KB</p></div>`).join('')||'<div class="ps5-card" style="text-align:center;opacity:0.3">No files</div>'}</div>`;
+                    break;
+                case 'exam':
+                    enterExamMode();
+                    navigateTo('home');
+                    break;
+                case 'random':
+                    renderRandomPage(m);
+                    break;
+            }
+        }
+
+        function updateNav() { document.querySelectorAll('.ps5-nav-icon').forEach(i => i.classList.toggle('active', i.dataset.page === currentPage)); }
+
+        function navigateTo(p) { currentPage = p;
+            renderAll();
+            document.querySelector('.content-area').scrollTop = 0; }
+
+        function sendAiMsg() { const input = document.getElementById('aiInput'),
+                box = document.getElementById('aiMessages'); if (!input || !box || !input.value.trim()) return;
+            box.innerHTML +=
+                `<div class="ai-msg user"><div>${input.value}</div></div><div class="ai-msg ai"><div style="opacity:0.5;font-size:0.7rem">C2</div><div>Received: ${input.value}</div></div>`;
+            input.value = '';
+            box.scrollTop = box.scrollHeight; }
+
+        function showNewPostModal() { document.getElementById('generalModalContent').innerHTML =
+                `<h3>New Post</h3><label>Title</label><input type="text" id="postTitle"><label>Content</label><textarea id="postContent"></textarea><div class="ps5-modal-actions"><button class="ps5-btn ps5-btn-primary" onclick="createPost()">Post</button><button class="ps5-btn ps5-btn-outline" onclick="closeModal()">Cancel</button></div>`;
+            document.getElementById('generalModal').classList.remove('hidden'); }
+
+        function createPost() { const t = document.getElementById('postTitle')?.value.trim(),
+                c = document.getElementById('postContent')?.value.trim(); if (!t || !c) return; const db = getDB();
+            db.posts.push({ id: genId(), title: t, content: c, time: new Date().toISOString() });
+            saveDB(db);
+            closeModal();
+            renderAll();
+            toast('Post created'); }
+
+        function sendMsg() { const input = document.getElementById('msgInput'); if (!input || !input.value.trim()) return; const db = getDB(); if (!db.messages['class']) db.messages['class'] = [];
+            db.messages['class'].push({ id: genId(), sender: 'Me', content: input.value.trim(), time: new Date().toISOString() });
+            saveDB(db);
+            renderAll(); }
+
+        function showScheduleModal() { document.getElementById('generalModalContent').innerHTML =
+                `<h3>Add Event</h3><label>Title</label><input type="text" id="schedTitle"><label>Date</label><input type="date" id="schedDate"><div class="ps5-modal-actions"><button class="ps5-btn ps5-btn-primary" onclick="addSchedule()">Save</button><button class="ps5-btn ps5-btn-outline" onclick="closeModal()">Cancel</button></div>`;
+            document.getElementById('generalModal').classList.remove('hidden'); }
+
+        function addSchedule() { const t = document.getElementById('schedTitle')?.value.trim(),
+                d = document.getElementById('schedDate')?.value; if (!t || !d) return; const db = getDB();
+            db.schedules.push({ id: genId(), title: t, date: d });
+            saveDB(db);
+            closeModal();
+            renderAll();
+            toast('Event added'); }
+
+        function markAttendance() { const db = getDB();
+            db.attendance.push({ id: genId(), date: new Date().toISOString().split('T')[0], time: new Date().toISOString() });
+            saveDB(db);
+            renderAll();
+            toast('Checked in'); }
+
+        function showUploadModal() { document.getElementById('generalModalContent').innerHTML =
+                `<h3>Upload File</h3><input type="file" id="fileInput" onchange="window._pf=this.files[0]"><div class="ps5-modal-actions"><button class="ps5-btn ps5-btn-primary" onclick="uploadFile()">Upload</button><button class="ps5-btn ps5-btn-outline" onclick="closeModal()">Cancel</button></div>`;
+            document.getElementById('generalModal').classList.remove('hidden'); }
+
+        function uploadFile() { const f = window._pf; if (!f) return; const db = getDB();
+            db.files.push({ id: genId(), name: f.name, size: f.size });
+            saveDB(db);
+            closeModal();
+            renderAll();
+            toast('File uploaded'); }
+
+        function closeModal() { document.getElementById('generalModal').classList.add('hidden'); }
+
+        // ==================== 随机抽选 ====================
+        const ds = { students: [...Array.from({ length: 26 }, (_, i) => `A${i + 1}`), ...Array.from({ length: 25 }, (_, i) => `B${i + 1}`)], sel: null, exc: null, hist: [], mode: 'auto', run: false, t: null, f: null, st: 0 };
+
+        function renderRandomPage(m) { if (!ds.sel) { ds.sel = new Set(ds.students);
+                ds.exc = new Set(); }
+            m.innerHTML = `
+            <div style="display:flex;gap:2rem;flex-wrap:wrap">
+                <div style="flex:1;min-width:280px">
+                    <div style="display:flex;gap:0.5rem;margin-bottom:1rem">
+                        <button class="ps5-btn ps5-btn-outline ps5-btn-sm" onclick="selectAllDraw()">All</button>
+                        <button class="ps5-btn ps5-btn-outline ps5-btn-sm" onclick="deselectAllDraw()">None</button>
+                        <button class="ps5-btn ps5-btn-outline ps5-btn-sm" onclick="resetAllDraw()">Reset</button>
+                    </div>
+                    <div class="student-grid-draw" id="studentsGrid"></div>
+                </div>
+                <div style="width:300px;text-align:center">
+                    <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:1rem">
+                        <button class="ps5-btn ps5-btn-sm" id="modeAuto" onclick="setDrawMode('auto')" style="background:var(--ps-gradient)">Auto</button>
+                        <button class="ps5-btn ps5-btn-outline ps5-btn-sm" id="modeManual" onclick="setDrawMode('manual')">Manual</button>
+                    </div>
+                    <div class="draw-big-circle" id="drawCircle">?</div>
+                    <button class="ps5-btn ps5-btn-primary" id="actionBtn" onclick="toggleDraw()" style="width:100%;margin-top:1rem;padding:1rem;font-size:1.2rem">START</button>
+                    <div style="margin-top:1.5rem;background:rgba(0,0,0,0.3);border-radius:20px;padding:1rem;border:1px solid var(--ps-border)">
+                        <p style="font-size:0.8rem;opacity:0.4;margin-bottom:0.5rem">HISTORY (<span id="historyCount">0</span>)</p>
+                        <div id="historyList" style="max-height:120px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:0.4rem"></div>
+                    </div>
+                </div>
+            </div>`;
+            renderStudentsGrid(); }
+
+        function renderStudentsGrid() { const g = document.getElementById('studentsGrid'); if (!g) return;
+            g.innerHTML = '';
+            ds.students.forEach(id => { const d = document.createElement('div');
+                d.className = 'student-cell-draw';
+                d.textContent = id; if (ds.sel.has(id)) d.classList.add('selected'); if (ds.exc.has(id)) d.classList.add('excluded');
+                d.addEventListener('click', () => { if (ds.exc.has(id)) return; if (ds.sel.has(id)) ds.sel.delete(id); else ds.sel.add(id);
+                    renderStudentsGrid(); }); let lt = null;
+                d.addEventListener('mousedown', () => { if (ds.students.filter(x => !ds.exc.has(x)).length < 3 || ds.exc.has(id)) return;
+                    lt = setTimeout(() => { ds.exc.add(id);
+                        ds.sel.delete(id);
+                        renderStudentsGrid();
+                        lt = null; }, 3000); });
+                d.addEventListener('mouseup', () => { if (lt) clearTimeout(lt); });
+                d.addEventListener('mouseleave', () => { if (lt) clearTimeout(lt); });
+                g.appendChild(d); });
+        }
+
+        function selectAllDraw() { ds.students.forEach(id => { if (!ds.exc.has(id)) ds.sel.add(id); });
+            renderStudentsGrid(); }
+
+        function deselectAllDraw() { ds.sel.clear();
+            renderStudentsGrid(); }
+
+        function resetAllDraw() { ds.sel = new Set(ds.students);
+            ds.exc.clear();
+            ds.hist = [];
+            document.getElementById('drawCircle').textContent = '?';
+            document.getElementById('drawCircle').className = 'draw-big-circle';
+            renderStudentsGrid();
+            updateHistDraw(); }
+
+        function setDrawMode(mode) { ds.mode = mode;
+            document.getElementById('modeAuto').style.background = mode === 'auto' ? 'var(--ps-gradient)' : 'transparent';
+            document.getElementById('modeManual').style.background = mode === 'manual' ? 'var(--ps-gradient)' : 'transparent'; }
+
+        function toggleDraw() { if (ds.run) stopDraw(); else startDraw(); }
+
+        function startDraw() { const a = Array.from(ds.sel).filter(id => !ds.exc.has(id)); if (a.length === 0) return;
+            ds.run = true;
+            document.getElementById('actionBtn').textContent = 'STOP';
+            document.getElementById('drawCircle').classList.add('rolling');
+            ds.st = performance.now(); if (ds.mode === 'auto') animAuto(a); else animManual(a); }
+
+        function animAuto(a) { const D = 5000,
+                c = document.getElementById('drawCircle');
+
+            function step(t) { if (!ds.run) return; const e = Math.min((t - ds.st) / D, 1),
+                    iv = 50 + (500 - 50) * Math.pow(e, 2);
+                c.textContent = a[Math.floor(Math.random() * a.length)]; if (e < 1) { ds.t = setTimeout(() => { ds.f = requestAnimationFrame(step); }, iv); } else stopDraw(); }
+            ds.f = requestAnimationFrame(step); }
+
+        function animManual(a) { const c = document.getElementById('drawCircle');
+
+            function step() { if (!ds.run) return;
+                c.textContent = a[Math.floor(Math.random() * a.length)];
+                ds.t = setTimeout(() => { ds.f = requestAnimationFrame(step); }, 50); }
+            ds.f = requestAnimationFrame(step); }
+
+        function stopDraw() { if (!ds.run) return;
+            ds.run = false; if (ds.t) clearTimeout(ds.t); if (ds.f) cancelAnimationFrame(ds.f);
+            document.getElementById('actionBtn').textContent = 'START';
+            document.getElementById('drawCircle').classList.remove('rolling');
+            document.getElementById('drawCircle').classList.add('winner'); const w = document.getElementById('drawCircle').textContent; if (w && w !== '?' && !ds.hist.includes(w)) { ds.hist.unshift(w); if (ds.hist.length > 51) ds.hist.pop();
+                updateHistDraw(); } }
+
+        function updateHistDraw() { const l = document.getElementById('historyList'),
+                c = document.getElementById('historyCount'); if (!l || !c) return;
+            c.textContent = ds.hist.length;
+            l.innerHTML = ds.hist.map((x, i) => `<span style="padding:0.2rem 0.6rem;background:rgba(0,112,204,0.3);border-radius:12px;font-size:0.75rem">${ds.hist.length-i}. ${x}</span>`).join(''); }
+
+        // ==================== 考试模式 ====================
+        function enterExamMode() { document.getElementById('examFullscreen').classList.add('show');
+            updateExamDisplay(); }
+
+        function exitExamMode() { document.getElementById('examFullscreen').classList.remove('show'); }
+
+        function showExamSettings() { const db = getDB(); const s = prompt('Subject:', db.examSettings?.subject || 'Mathematics'),
+                st = prompt('Start (HH:MM):', db.examSettings?.startTime || '08:00'),
+                et = prompt('End (HH:MM):', db.examSettings?.endTime || '10:00'); if (s && st && et) { db.examSettings = { subject: s,
+                    startTime: st, endTime: et };
+                saveDB(db);
+                updateExamDisplay(); } }
+
+        function updateExamDisplay() { const db = getDB(); const { subject, startTime, endTime } = db.examSettings || { subject: 'Mathematics',
+                startTime: '08:00', endTime: '10:00' };
+            document.getElementById('examSubject').textContent = subject;
+            document.getElementById('examTimeRange').textContent = `${startTime} — ${endTime}`;
+            updateExamClock(); }
+
+        function updateExamClock() { const n = new Date();
+            document.getElementById('examClock').textContent = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+            document.getElementById('examDate').textContent = n.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric',
+                month: 'long', day: 'numeric' }); }
+
+        function performSearch() { const q = document.getElementById('globalSearch').value.trim(); if (q) toast('Search: ' + q); }
+
+        function logout() { toast('Goodbye'); }
+
+        setInterval(() => { if (document.getElementById('examFullscreen').classList.contains('show')) updateExamClock(); }, 1000);
+        document.getElementById('generalModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+        renderAll();
+        console.log('🎮 PS5 UI — Class 2 Smart Platform');
+    </script>
+</body>
+</html>
