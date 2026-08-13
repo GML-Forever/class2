@@ -1582,10 +1582,17 @@
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
-
-    <script>
-      
     
+
+<script>
+
+        // ========== 本地存储封装（必须先定义） ==========
+        const Storage = {
+            set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
+            get: (key) => { try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; } },
+            remove: (key) => localStorage.removeItem(key)
+        };
+
         // ========== 全局状态 ==========
         let currentUser = null;
         let currentTab = 'welcome';
@@ -1595,7 +1602,7 @@
         let countdownTimer = null;
         let examTimer = null;
         let clockTimer = null;
-        
+
         let examSubjects = Storage.get('c2_exam_schedule') || [
             { name: '语文', start: '2026-08-12T09:00', end: '2026-08-12T11:30' },
             { name: '数学', start: '2026-08-12T14:00', end: '2026-08-12T16:00' },
@@ -1603,18 +1610,11 @@
             { name: '物理', start: '2026-08-13T14:00', end: '2026-08-13T15:30' },
             { name: '化学', start: '2026-08-14T09:00', end: '2026-08-14T10:30' }
         ];
-        
+
         let currentExamIndex = 0;
         let rooms = Storage.get('c2_rooms') || {
             'general': { name: '📢 班级公告', messages: [{type:'ai', text:'欢迎来到班级公告频道！', user:'系统', time: new Date().toISOString()}] },
             'random': { name: '💬 闲聊', messages: [{type:'ai', text:'随便聊聊吧！', user:'系统', time: new Date().toISOString()}] }
-        };
-
-        // ========== 本地存储封装 ==========
-        const Storage = {
-            set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
-            get: (key) => { try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; } },
-            remove: (key) => localStorage.removeItem(key)
         };
 
         // ========== 初始化 ==========
@@ -1628,14 +1628,14 @@
             renderExamSchedule();
             initExamSettings();
             renderRoomList();
-            
+
             const dropZone = document.getElementById('fileDropZone');
             if (dropZone) {
                 dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
                 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
                 dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFileDrop(e); });
             }
-            
+
             document.getElementById('activationDate').textContent = '网站激活日期: ' + new Date().toISOString().split('T')[0];
         });
 
@@ -1694,16 +1694,16 @@
             verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
             console.log('验证码:', verificationCode);
             showToast('验证码已发送至 ' + email + '（演示模式，验证码: ' + verificationCode + '）', 'info');
-            
+
             document.getElementById('verifyEmail').textContent = email;
             document.getElementById('verifySection').classList.add('active');
             document.getElementById('registerStep1').style.display = 'none';
             document.getElementById('sendCodeBtn').disabled = true;
-            
+
             let seconds = 60;
             document.getElementById('countdown').textContent = seconds;
             document.getElementById('resendLink').style.display = 'none';
-            
+
             if (countdownTimer) clearInterval(countdownTimer);
             countdownTimer = setInterval(() => {
                 seconds--;
@@ -1714,7 +1714,7 @@
                     document.getElementById('sendCodeBtn').disabled = false;
                 }
             }, 1000);
-            
+
             setTimeout(() => {
                 const firstDigit = document.querySelector('.code-digit[data-index="0"]');
                 if (firstDigit) firstDigit.focus();
@@ -1740,7 +1740,7 @@
             const inputs = document.querySelectorAll('.code-digit');
             let enteredCode = '';
             inputs.forEach(input => enteredCode += input.value);
-            
+
             if (enteredCode === verificationCode) {
                 document.getElementById('verifySection').classList.remove('active');
                 document.getElementById('usernameSection').classList.add('active');
@@ -1818,7 +1818,7 @@
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainScreen').classList.add('active');
             updateUserDisplay();
-            
+
             if (currentUser && (currentUser.role === 'headteacher' || currentUser.role === 'teacher')) {
                 document.getElementById('newsEditorSection').style.display = 'block';
             }
@@ -1841,7 +1841,7 @@
             document.querySelector('.nav-tab[data-tab="' + tab + '"]').classList.add('active');
             document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + tab).classList.add('active');
-            
+
             if (tab === 'exam') {
                 initExamTimer();
             }
@@ -1866,14 +1866,14 @@
             document.getElementById('profileEmailInput').value = currentUser.email;
             const roleMap = { headteacher: '班主任', teacher: '教师', parent: '家长', student: '学生' };
             document.getElementById('profileRoleInput').value = roleMap[currentUser.role] || currentUser.role;
-            
+
             const avatarLarge = document.getElementById('profileAvatarLarge');
             if (currentUser.avatar) {
                 avatarLarge.innerHTML = '<img src="' + currentUser.avatar + '" style="width:100%;height:100%;object-fit:cover;"><div class="avatar-edit-hint">点击更换</div>';
             } else {
                 avatarLarge.innerHTML = '<span id="profileAvatarText">' + currentUser.username.charAt(0).toUpperCase() + '</span><div class="avatar-edit-hint">点击更换</div>';
             }
-            
+
             document.getElementById('profileModal').classList.add('active');
         }
 
@@ -1884,7 +1884,7 @@
         function handleAvatarChange(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 const avatarLarge = document.getElementById('profileAvatarLarge');
@@ -1899,21 +1899,21 @@
                 showToast('用户名不能为空', 'error');
                 return;
             }
-            
+
             const avatarImg = document.querySelector('#profileAvatarLarge img');
             const newAvatar = avatarImg ? avatarImg.src : null;
-            
+
             currentUser.username = newName;
             currentUser.avatar = newAvatar;
             Storage.set('c2_user', currentUser);
-            
+
             const users = Storage.get('c2_users') || {};
             if (users[currentUser.email]) {
                 users[currentUser.email].username = newName;
                 users[currentUser.email].avatar = newAvatar;
                 Storage.set('c2_users', users);
             }
-            
+
             updateUserDisplay();
             closeProfile();
             showToast('个人信息已更新', 'success');
@@ -1932,7 +1932,7 @@
                 showToast('请输入新闻内容', 'error');
                 return;
             }
-            
+
             const news = Storage.get('c2_news') || [];
             news.unshift({
                 content: content,
@@ -1949,12 +1949,12 @@
         function loadNews() {
             const container = document.getElementById('newsContainer');
             const news = Storage.get('c2_news') || [];
-            
+
             if (news.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--ps5-text-dim);">暂无新闻</div>';
                 return;
             }
-            
+
             container.innerHTML = news.map(item => {
                 const date = new Date(item.time);
                 const timeStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0') + ' ' + String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
@@ -1964,27 +1964,27 @@
 
         // ========== C2 AI (Gemini) ==========
         const GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || '';
-        
+
         async function sendAIMessage() {
             const input = document.getElementById('aiInput');
             const message = input.value.trim();
             if (!message) return;
-            
+
             const messagesDiv = document.getElementById('aiMessages');
             messagesDiv.innerHTML += '<div class="chat-message user">' + escapeHtml(message) + '</div>';
             input.value = '';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
+
             const loadingId = 'loading-' + Date.now();
             messagesDiv.innerHTML += '<div class="chat-message ai" id="' + loadingId + '"><div class="loading-spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></div>思考中...</div>';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
+
             if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
                 document.getElementById(loadingId).innerHTML = '⚠️ 请先配置 Gemini API Key。<br><br>获取方式：<br>1. 访问 <a href="https://aistudio.google.com/app/apikey"; target="_blank" style="color:#0070d1;">Google AI Studio</a><br>2. 点击 "Create API Key"<br>3. 在浏览器控制台执行：localStorage.setItem("gemini_api_key", "你的APIKey")<br>4. 刷新页面即可使用';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 return;
             }
-            
+
             try {
                 const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_API_KEY, {
                     method: 'POST',
@@ -1993,20 +1993,20 @@
                         contents: [{ parts: [{ text: message }] }]
                     })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('API请求失败: ' + response.status);
                 }
-                
+
                 const data = await response.json();
                 let reply = '抱歉，我暂时无法回答这个问题。';
-                
+
                 if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
                     reply = data.candidates[0].content.parts[0].text;
                 } else if (data.error) {
                     reply = 'API错误: ' + data.error.message;
                 }
-                
+
                 document.getElementById(loadingId).innerHTML = escapeHtml(reply).replace(/\n/g, '<br>');
             } catch (error) {
                 document.getElementById(loadingId).innerHTML = '❌ 连接失败: ' + escapeHtml(error.message) + '<br><br>请检查：<br>1. API Key 是否正确<br>2. 网络连接是否正常<br>3. 是否超出免费额度限制（15 RPM）';
@@ -2031,7 +2031,7 @@
 
         function processFiles(files) {
             const storedFiles = Storage.get('c2_files') || [];
-            
+
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -2054,12 +2054,12 @@
         function loadFiles() {
             const container = document.getElementById('fileList');
             const files = Storage.get('c2_files') || [];
-            
+
             if (files.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--ps5-text-dim); grid-column:1/-1;">暂无文件，点击上方区域上传</div>';
                 return;
             }
-            
+
             container.innerHTML = files.map((file, index) => {
                 const icon = getFileIcon(file.name);
                 return '<div class="file-item" onclick="downloadFile(' + index + ')"><div class="file-icon">' + icon + '</div><div class="file-name">' + escapeHtml(file.name) + '</div><div class="file-size">' + file.size + '</div></div>';
@@ -2070,7 +2070,7 @@
             const files = Storage.get('c2_files') || [];
             const file = files[index];
             if (!file) return;
-            
+
             const a = document.createElement('a');
             a.href = file.data;
             a.download = file.name;
@@ -2103,12 +2103,12 @@
         function publishPost() {
             const content = document.getElementById('postInput').value.trim();
             const visibility = document.getElementById('postVisibility').value;
-            
+
             if (!content) {
                 showToast('请输入内容', 'error');
                 return;
             }
-            
+
             const posts = Storage.get('c2_posts') || [];
             posts.unshift({
                 content: content,
@@ -2127,26 +2127,26 @@
             const container = document.getElementById('postsContainer');
             const posts = Storage.get('c2_posts') || [];
             const userRole = currentUser ? currentUser.role : '';
-            
+
             const visiblePosts = posts.filter(post => {
                 if (post.visibility === 'all') return true;
                 if (post.visibility === 'students') return userRole === 'student';
                 if (post.visibility === 'teachers') return userRole === 'teacher' || userRole === 'headteacher';
                 return true;
             });
-            
+
             if (visiblePosts.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--ps5-text-dim);">暂无帖子</div>';
                 return;
             }
-            
+
             container.innerHTML = visiblePosts.map(post => {
                 const date = new Date(post.time);
                 const timeStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0') + ' ' + String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
                 const visibilityLabel = post.visibility === 'students' ? '🔒 仅学生' : post.visibility === 'teachers' ? '🔒 仅教师' : '🌐 公开';
-                
+
                 let avatarHtml = '<div class="post-avatar">' + (post.author ? post.author.charAt(0).toUpperCase() : 'U') + '</div>';
-                
+
                 return '<div class="post-card"><div class="post-header"><div class="post-author">' + avatarHtml + '<div><div style="font-weight:600;">' + escapeHtml(post.author || '匿名') + '</div><div class="post-meta">' + timeStr + ' · ' + visibilityLabel + '</div></div></div></div><div class="post-content">' + escapeHtml(post.content) + '</div><div class="post-actions"><div class="post-action">👍 点赞</div><div class="post-action">💬 评论</div><div class="post-action">↗️ 分享</div></div></div>';
             }).join('');
         }
@@ -2155,7 +2155,7 @@
         function renderRoomList() {
             const container = document.getElementById('roomListContainer');
             const roomKeys = Object.keys(rooms);
-            
+
             container.innerHTML = roomKeys.map(key => {
                 const room = rooms[key];
                 const lastMsg = room.messages && room.messages.length > 0 ? room.messages[room.messages.length - 1] : null;
@@ -2179,7 +2179,7 @@
                 container.innerHTML = '<div class="chat-message ai">欢迎来到聊天室！</div>';
                 return;
             }
-            
+
             container.innerHTML = room.messages.map(msg => {
                 const isUser = msg.user === currentUser.username;
                 return '<div class="chat-message ' + (isUser ? 'user' : 'ai') + '"><div style="font-size:0.75rem; opacity:0.7; margin-bottom:4px;">' + escapeHtml(msg.user || '匿名') + '</div>' + escapeHtml(msg.text) + '</div>';
@@ -2191,7 +2191,7 @@
             const input = document.getElementById('roomInput');
             const text = input.value.trim();
             if (!text) return;
-            
+
             if (!rooms[currentRoom]) return;
             rooms[currentRoom].messages.push({
                 text: text,
@@ -2219,7 +2219,7 @@
                 showToast('请输入聊天室名称', 'error');
                 return;
             }
-            
+
             const roomId = 'room-' + Date.now();
             rooms[roomId] = {
                 name: name,
@@ -2243,18 +2243,18 @@
             const currentTimeEl = document.getElementById('examCurrentTime');
             const statusEl = document.getElementById('examStatus');
             const progressBar = document.getElementById('examProgressBar');
-            
+
             if (!currentTimeEl || !statusEl || !progressBar) return;
-            
+
             currentTimeEl.textContent = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
-            
+
             const subject = examSubjects[currentExamIndex];
             if (!subject) return;
-            
+
             const startTime = new Date(subject.start);
             const endTime = new Date(subject.end);
             const totalDuration = endTime - startTime;
-            
+
             if (now < startTime) {
                 const diff = startTime - now;
                 const minutes = Math.floor(diff / 60000);
@@ -2269,7 +2269,7 @@
                 const remainingMinutes = Math.floor(remaining / 60000);
                 const remainingSeconds = Math.floor((remaining % 60000) / 1000);
                 const progress = (elapsed / totalDuration) * 100;
-                
+
                 statusEl.textContent = '考试进行中 - 剩余 ' + remainingMinutes + ':' + String(remainingSeconds).padStart(2,'0');
                 statusEl.className = 'exam-status';
                 progressBar.style.width = (100 - progress) + '%';
@@ -2291,7 +2291,7 @@
         function renderExamSchedule() {
             const container = document.getElementById('examScheduleList');
             if (!container) return;
-            
+
             container.innerHTML = examSubjects.map((sub, i) => {
                 const start = new Date(sub.start);
                 const end = new Date(sub.end);
@@ -2304,7 +2304,7 @@
         function initExamSettings() {
             const container = document.getElementById('examSettingsList');
             if (!container) return;
-            
+
             container.innerHTML = examSubjects.map((sub, i) => {
                 return '<div class="exam-setting-row"><label>' + sub.name + '</label><input type="datetime-local" id="exam-start-' + i + '" value="' + sub.start + '"><input type="datetime-local" id="exam-end-' + i + '" value="' + sub.end + '"></div>';
             }).join('');
@@ -2360,7 +2360,7 @@
             toast.className = 'toast ' + type;
             toast.innerHTML = '<span>' + message + '</span>';
             container.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateX(100px)';
