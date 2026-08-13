@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -58,7 +59,6 @@
             z-index: -1;
         }
 
-        /* ========== 登录/注册界面 ========== */
         .auth-screen {
             display: flex;
             flex-direction: column;
@@ -294,7 +294,6 @@
             display: block;
         }
 
-        /* ========== 主界面 ========== */
         .main-screen {
             display: none;
             min-height: 100vh;
@@ -514,7 +513,6 @@
             margin-bottom: 30px;
         }
 
-        /* 新闻 */
         .news-editor {
             background: var(--ps5-card);
             border: 1px solid var(--ps5-border);
@@ -568,7 +566,6 @@
             line-height: 1.6;
         }
 
-        /* AI聊天 */
         .chat-container {
             display: flex;
             flex-direction: column;
@@ -655,7 +652,6 @@
             box-shadow: var(--ps5-glow);
         }
 
-        /* 文件 */
         .file-drop-zone {
             border: 2px dashed var(--ps5-border);
             border-radius: var(--ps5-radius);
@@ -713,7 +709,6 @@
             font-size: 0.8rem;
         }
 
-        /* 社区 */
         .post-card {
             background: var(--ps5-card);
             border: 1px solid var(--ps5-border);
@@ -784,7 +779,6 @@
             color: var(--ps5-text);
         }
 
-        /* 考试模式 */
         .exam-header {
             display: flex;
             justify-content: space-between;
@@ -894,7 +888,6 @@
             font-size: 0.9rem;
         }
 
-        /* 群聊 */
         .chat-rooms {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -971,7 +964,6 @@
             flex-direction: column;
         }
 
-        /* 支持 */
         .support-content {
             text-align: center;
             padding: 60px 20px;
@@ -1017,7 +1009,6 @@
             border-color: var(--ps5-blue-light);
         }
 
-        /* 个人信息 */
         .profile-modal {
             display: none;
             position: fixed;
@@ -1108,7 +1099,6 @@
             text-align: center;
         }
 
-        /* 模态框 */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -1177,14 +1167,6 @@
 
         .modal-btn.primary:hover {
             background: var(--ps5-blue-light);
-        }
-
-        .draw-embed {
-            width: 100%;
-            height: calc(100vh - 180px);
-            border: none;
-            border-radius: var(--ps5-radius);
-            background: transparent;
         }
 
         @media (max-width: 768px) {
@@ -1275,7 +1257,6 @@
 
         .hidden { display: none !important; }
 
-        /* 考试设置 */
         .exam-setting-row {
             display: flex;
             gap: 10px;
@@ -1295,23 +1276,435 @@
             color: var(--ps5-text);
             font-size: 0.9rem;
         }
+
+        #draw-container {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: calc(100vh - 180px);
+            color: #fff;
+            overflow-x: hidden;
+            border-radius: var(--ps5-radius);
+        }
+
+        #draw-container * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #draw-container .range-selector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 180px);
+            padding: 20px;
+        }
+
+        #draw-container .range-selector h1 {
+            font-size: 3rem;
+            margin-bottom: 50px;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #fff, #a8d8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #draw-container .range-options {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #draw-container .range-btn {
+            padding: 30px 50px;
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+            text-align: center;
+        }
+
+        #draw-container .range-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.6);
+        }
+
+        #draw-container .range-btn:active {
+            transform: translateY(-2px);
+        }
+
+        #draw-container .draw-panel {
+            display: none;
+            min-height: calc(100vh - 180px);
+            padding: 20px;
+        }
+
+        #draw-container .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        #draw-container .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        #draw-container .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(-3px);
+        }
+
+        #draw-container .back-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        #draw-container .range-display {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            background: rgba(0,0,0,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        #draw-container .control-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            flex-wrap: wrap;
+        }
+
+        #draw-container .control-btn {
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        #draw-container .control-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.05);
+        }
+
+        #draw-container .main-content {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        #draw-container .students-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        #draw-container .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 12px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #draw-container .student-item {
+            position: relative;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        #draw-container .student-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        #draw-container .student-item.draw-selected {
+            background: rgba(46, 204, 113, 0.3);
+            border-color: #2ecc71;
+        }
+
+        #draw-container .student-item.draw-selected::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            font-size: 0.8rem;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        #draw-container .student-item.excluded {
+            cursor: not-allowed;
+        }
+
+        #draw-container .draw-section {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #draw-container .mode-selector {
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 5px;
+            border-radius: 30px;
+        }
+
+        #draw-container .mode-btn {
+            padding: 10px 25px;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        #draw-container .mode-btn.draw-active {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        #draw-container .draw-circle {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 4px solid rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: bold;
+            box-shadow: 0 0 60px rgba(52, 152, 219, 0.3), inset 0 0 60px rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #draw-container .draw-circle.rolling {
+            animation: draw-pulse 0.5s ease-in-out infinite;
+            border-color: #3498db;
+            box-shadow: 0 0 80px rgba(52, 152, 219, 0.6);
+        }
+
+        @keyframes draw-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        #draw-container .draw-circle.winner {
+            border-color: #2ecc71;
+            box-shadow: 0 0 100px rgba(46, 204, 113, 0.5);
+            background: linear-gradient(145deg, rgba(46, 204, 113, 0.2), rgba(39, 174, 96, 0.1));
+        }
+
+        #draw-container .action-btn {
+            width: 200px;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #draw-container .action-btn.start {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            color: white;
+            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        #draw-container .action-btn.stop {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
+            animation: draw-shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes draw-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+
+        #draw-container .history-section {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #draw-container .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        #draw-container .history-title {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #draw-container .history-toggle {
+            transition: transform 0.3s ease;
+        }
+
+        #draw-container .history-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        #draw-container .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        #draw-container .history-list.collapsed {
+            max-height: 0;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        #draw-container .history-item {
+            padding: 5px 12px;
+            background: rgba(52, 152, 219, 0.3);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(52, 152, 219, 0.5);
+        }
+
+        #draw-container .screen-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 0 solid rgba(231, 76, 60, 0.8);
+            pointer-events: none;
+            z-index: 9999;
+            transition: border-width 0.1s ease;
+        }
+
+        #draw-container .screen-flash.draw-active {
+            border-width: 20px;
+            animation: draw-flash 0.3s ease-out;
+        }
+
+        @keyframes draw-flash {
+            0% { border-width: 0; opacity: 0; }
+            50% { opacity: 1; }
+            100% { border-width: 20px; opacity: 0; }
+        }
+
+        #draw-container ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #draw-container ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+
+        #draw-container ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+
+        #draw-container ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        @media (max-width: 768px) {
+            #draw-container .main-content {
+                flex-direction: column;
+            }
+            #draw-container .draw-section {
+                width: 100%;
+            }
+            #draw-container .draw-circle {
+                width: 200px;
+                height: 200px;
+                font-size: 3rem;
+            }
+            #draw-container .range-selector h1 {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="bg-layer"></div>
     <div class="bg-overlay"></div>
 
-    <!-- ========== 登录/注册界面 ========== -->
     <div class="auth-screen" id="authScreen">
         <div class="auth-logo">C2 Intelligence</div>
         <div class="auth-subtitle">Class 2 Smart Campus System</div>
-        
         <div class="auth-card">
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchAuthTab('login')" id="tabLogin">登录</button>
                 <button class="auth-tab" onclick="switchAuthTab('register')" id="tabRegister">注册</button>
             </div>
-
             <div id="loginForm">
                 <div class="form-group">
                     <label class="form-label">邮箱地址</label>
@@ -1323,7 +1716,6 @@
                 </div>
                 <button class="btn-primary" onclick="handleLogin()">登录</button>
             </div>
-
             <div id="registerForm" style="display:none;">
                 <div id="registerStep1">
                     <div class="form-group">
@@ -1345,7 +1737,6 @@
                     </div>
                     <button class="btn-primary" onclick="sendVerificationCode()" id="sendCodeBtn">发送验证码</button>
                 </div>
-
                 <div class="verify-section" id="verifySection">
                     <p style="text-align:center; color:var(--ps5-text-dim); margin-bottom:10px;">验证码已发送至 <span id="verifyEmail"></span></p>
                     <div class="code-inputs">
@@ -1359,7 +1750,6 @@
                     <button class="btn-primary" onclick="verifyCode()">验证并继续</button>
                     <p class="timer-text"><span id="countdown">60</span>秒后可重新发送 <span class="resend-link" id="resendLink" style="display:none;" onclick="sendVerificationCode()">重新发送</span></p>
                 </div>
-
                 <div class="username-section" id="usernameSection">
                     <p style="text-align:center; color:var(--ps5-text-dim); margin-bottom:20px;">验证成功！请设置您的用户名</p>
                     <div class="form-group">
@@ -1372,7 +1762,6 @@
         </div>
     </div>
 
-    <!-- ========== 主界面 ========== -->
     <div class="main-screen" id="mainScreen">
         <div class="top-bar">
             <div class="nav-tabs">
@@ -1436,7 +1825,67 @@
             <div class="page-section" id="page-draw">
                 <div class="page-header">随机抽选</div>
                 <div class="page-subtitle">公平公正的班级抽选系统</div>
-                <iframe class="draw-embed" id="drawFrame" src="draw.html"></iframe>
+                <div id="draw-container">
+                    <div class="range-selector" id="rangeSelector">
+                        <h1>C2 Intelligence</h1>
+                        <div class="range-options">
+                            <button class="range-btn" onclick="selectRange('A')">
+                                <div>Class A</div>
+                                <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 10px;">A1 ~ A26</div>
+                            </button>
+                            <button class="range-btn" onclick="selectRange('B')">
+                                <div>Class B</div>
+                                <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 10px;">B1 ~ B25</div>
+                            </button>
+                            <button class="range-btn" onclick="selectRange('ALL')">
+                                <div>Whole Class</div>
+                                <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 10px;">A1~A26 + B1~B25</div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="draw-panel" id="drawPanel">
+                        <div class="panel-header">
+                            <button class="back-btn" onclick="goBack()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                </svg>
+                                Back
+                            </button>
+                            <div class="range-display" id="rangeDisplay">Class A (A1~A26)</div>
+                        </div>
+                        <div class="control-bar">
+                            <button class="control-btn" onclick="selectAll()">Select All</button>
+                            <button class="control-btn" onclick="deselectAll()">Deselect All</button>
+                            <button class="control-btn" onclick="resetAll()">Reset</button>
+                        </div>
+                        <div class="main-content">
+                            <div class="students-section">
+                                <div class="students-grid" id="studentsGrid"></div>
+                            </div>
+                            <div class="draw-section">
+                                <div class="mode-selector">
+                                    <button class="mode-btn draw-active" onclick="setMode('auto')">Auto</button>
+                                    <button class="mode-btn" onclick="setMode('manual')">Manual</button>
+                                </div>
+                                <div class="draw-circle" id="drawCircle">?</div>
+                                <button class="action-btn start" id="actionBtn" onclick="toggleDraw()">Start</button>
+                                <div class="history-section">
+                                    <div class="history-header" onclick="toggleHistory()">
+                                        <div class="history-title">
+                                            <span>History</span>
+                                            <span id="historyCount" style="font-size: 0.8rem; opacity: 0.6;">(0/51)</span>
+                                        </div>
+                                        <svg class="history-toggle" id="historyToggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M6 9l6 6 6-6"/>
+                                        </svg>
+                                    </div>
+                                    <div class="history-list" id="historyList"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="screen-flash" id="screenFlash"></div>
+                </div>
             </div>
 
             <div class="page-section" id="page-community">
@@ -1497,8 +1946,12 @@
                         <button class="exam-subject-btn active" onclick="selectExamSubject(0)">语文</button>
                         <button class="exam-subject-btn" onclick="selectExamSubject(1)">数学</button>
                         <button class="exam-subject-btn" onclick="selectExamSubject(2)">英语</button>
-                        <button class="exam-subject-btn" onclick="selectExamSubject(3)">物理</button>
-                        <button class="exam-subject-btn" onclick="selectExamSubject(4)">化学</button>
+                        <button class="exam-subject-btn" onclick="selectExamSubject(3)">道法</button>
+                        <button class="exam-subject-btn" onclick="selectExamSubject(4)">历史</button>
+                        <button class="exam-subject-btn" onclick="selectExamSubject(5)">物理</button>
+                        <button class="exam-subject-btn" onclick="selectExamSubject(6)">化学</button>
+                        <button class="exam-subject-btn" onclick="selectExamSubject(7)">生物</button>
+                        <button class="exam-subject-btn" onclick="selectExamSubject(8)">地理</button>
                     </div>
                     <button class="btn-primary" style="width:auto; padding:10px 20px; font-size:0.9rem;" onclick="openExamSettings()">⚙️ 设置考试时间</button>
                 </div>
@@ -1582,10 +2035,10 @@
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
-    
 
-<script>
+    <script>
 
+        
         // ========== 本地存储封装（必须先定义） ==========
         const Storage = {
             set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
@@ -1607,8 +2060,12 @@
             { name: '语文', start: '2026-08-12T09:00', end: '2026-08-12T11:30' },
             { name: '数学', start: '2026-08-12T14:00', end: '2026-08-12T16:00' },
             { name: '英语', start: '2026-08-13T09:00', end: '2026-08-13T11:00' },
-            { name: '物理', start: '2026-08-13T14:00', end: '2026-08-13T15:30' },
-            { name: '化学', start: '2026-08-14T09:00', end: '2026-08-14T10:30' }
+            { name: '道法', start: '2026-08-13T14:00', end: '2026-08-13T15:30' },
+            { name: '历史', start: '2026-08-14T09:00', end: '2026-08-14T10:30' },
+            { name: '物理', start: '2026-08-14T14:00', end: '2026-08-14T15:30' },
+            { name: '化学', start: '2026-08-15T09:00', end: '2026-08-15T10:30' },
+            { name: '生物', start: '2026-08-15T14:00', end: '2026-08-15T15:30' },
+            { name: '地理', start: '2026-08-16T09:00', end: '2026-08-16T10:30' }
         ];
 
         let currentExamIndex = 0;
@@ -1616,6 +2073,20 @@
             'general': { name: '📢 班级公告', messages: [{type:'ai', text:'欢迎来到班级公告频道！', user:'系统', time: new Date().toISOString()}] },
             'random': { name: '💬 闲聊', messages: [{type:'ai', text:'随便聊聊吧！', user:'系统', time: new Date().toISOString()}] }
         };
+
+        // ========== 随机抽选全局状态 ==========
+        let drawCurrentRange = '';
+        let drawStudents = [];
+        let drawSelectedStudents = new Set();
+        let drawExcludedStudents = new Set();
+        let drawHistory = [];
+        let drawCurrentMode = 'auto';
+        let drawIsDrawing = false;
+        let drawTimeout = null;
+        let drawAnimationFrame = null;
+        let drawLongPressTimer = null;
+        let drawStartTime = 0;
+        const DRAW_BASE_SPEED = 50;
 
         // ========== 初始化 ==========
         document.addEventListener('DOMContentLoaded', () => {
@@ -2353,6 +2824,293 @@
             }
         }
 
+        // ========== 随机抽选功能（嵌入） ==========
+        function generateDrawStudents(range) {
+            const list = [];
+            if (range === 'A' || range === 'ALL') {
+                for (let i = 1; i <= 26; i++) {
+                    list.push('A' + i);
+                }
+            }
+            if (range === 'B' || range === 'ALL') {
+                for (let i = 1; i <= 25; i++) {
+                    list.push('B' + i);
+                }
+            }
+            return list;
+        }
+
+        function selectRange(range) {
+            drawCurrentRange = range;
+            drawStudents = generateDrawStudents(range);
+            
+            let displayText = '';
+            if (range === 'A') displayText = 'Class A (A1~A26)';
+            else if (range === 'B') displayText = 'Class B (B1~B25)';
+            else displayText = 'Whole Class (A1~A26 + B1~B25)';
+            document.getElementById('rangeDisplay').textContent = displayText;
+            
+            drawSelectedStudents = new Set(drawStudents);
+            drawExcludedStudents = new Set();
+            drawHistory = [];
+            updateDrawHistoryDisplay();
+            
+            renderDrawStudents();
+            
+            document.getElementById('rangeSelector').style.display = 'none';
+            document.getElementById('drawPanel').style.display = 'block';
+        }
+
+        function goBack() {
+            stopDraw();
+            document.getElementById('drawPanel').style.display = 'none';
+            document.getElementById('rangeSelector').style.display = 'flex';
+        }
+
+        function renderDrawStudents() {
+            const grid = document.getElementById('studentsGrid');
+            grid.innerHTML = '';
+            
+            drawStudents.forEach(id => {
+                const div = document.createElement('div');
+                div.className = 'student-item';
+                div.textContent = id;
+                div.dataset.id = id;
+                
+                if (drawSelectedStudents.has(id)) {
+                    div.classList.add('draw-selected');
+                }
+                if (drawExcludedStudents.has(id)) {
+                    div.classList.add('excluded');
+                }
+                
+                div.addEventListener('click', (e) => {
+                    if (drawExcludedStudents.has(id)) return;
+                    toggleDrawStudent(id);
+                });
+                
+                div.addEventListener('mousedown', (e) => startDrawLongPress(id, div));
+                div.addEventListener('touchstart', (e) => startDrawLongPress(id, div), {passive: true});
+                div.addEventListener('mouseup', (e) => endDrawLongPress(id, div));
+                div.addEventListener('touchend', (e) => endDrawLongPress(id, div));
+                div.addEventListener('mouseleave', () => cancelDrawLongPress());
+                div.addEventListener('touchcancel', () => cancelDrawLongPress());
+                
+                grid.appendChild(div);
+            });
+        }
+
+        function toggleDrawStudent(id) {
+            if (drawExcludedStudents.has(id)) return;
+            
+            const div = document.querySelector('#draw-container [data-id="' + id + '"]');
+            if (drawSelectedStudents.has(id)) {
+                drawSelectedStudents.delete(id);
+                div.classList.remove('draw-selected');
+            } else {
+                drawSelectedStudents.add(id);
+                div.classList.add('draw-selected');
+            }
+        }
+
+        function startDrawLongPress(id, div) {
+            if (drawExcludedStudents.has(id)) return;
+            
+            const availableCount = drawStudents.filter(s => !drawExcludedStudents.has(s)).length;
+            if (availableCount < 3) return;
+            
+            drawLongPressTimer = setTimeout(() => {
+                drawExcludedStudents.add(id);
+                drawSelectedStudents.delete(id);
+                div.classList.add('excluded');
+                
+                const flash = document.getElementById('screenFlash');
+                flash.classList.add('draw-active');
+                setTimeout(() => {
+                    flash.classList.remove('draw-active');
+                }, 300);
+                
+                drawLongPressTimer = null;
+            }, 3000);
+        }
+
+        function endDrawLongPress(id, div) {
+            if (drawLongPressTimer) {
+                clearTimeout(drawLongPressTimer);
+                drawLongPressTimer = null;
+            }
+        }
+
+        function cancelDrawLongPress() {
+            if (drawLongPressTimer) {
+                clearTimeout(drawLongPressTimer);
+                drawLongPressTimer = null;
+            }
+        }
+
+        function selectAll() {
+            drawStudents.forEach(id => {
+                if (!drawExcludedStudents.has(id)) {
+                    drawSelectedStudents.add(id);
+                }
+            });
+            renderDrawStudents();
+        }
+
+        function deselectAll() {
+            drawSelectedStudents.clear();
+            renderDrawStudents();
+        }
+
+        function resetAll() {
+            drawSelectedStudents = new Set(drawStudents);
+            drawExcludedStudents.clear();
+            drawHistory = [];
+            updateDrawHistoryDisplay();
+            document.getElementById('drawCircle').textContent = '?';
+            document.getElementById('drawCircle').className = 'draw-circle';
+            renderDrawStudents();
+        }
+
+        function setMode(mode) {
+            drawCurrentMode = mode;
+            document.querySelectorAll('#draw-container .mode-btn').forEach(btn => {
+                btn.classList.remove('draw-active');
+            });
+            event.target.classList.add('draw-active');
+        }
+
+        function toggleDraw() {
+            if (drawIsDrawing) {
+                stopDraw();
+            } else {
+                startDraw();
+            }
+        }
+
+        function startDraw() {
+            const availableStudents = Array.from(drawSelectedStudents).filter(id => !drawExcludedStudents.has(id));
+            if (availableStudents.length === 0) return;
+            
+            drawIsDrawing = true;
+            const btn = document.getElementById('actionBtn');
+            const circle = document.getElementById('drawCircle');
+            
+            btn.textContent = 'Stop';
+            btn.classList.remove('start');
+            btn.classList.add('stop');
+            circle.classList.add('rolling');
+            circle.classList.remove('winner');
+            
+            drawStartTime = performance.now();
+            
+            if (drawCurrentMode === 'auto') {
+                animateDrawAuto(availableStudents);
+            } else {
+                animateDrawManual(availableStudents);
+            }
+        }
+
+        function animateDrawAuto(availableStudents) {
+            const duration = 5000;
+            const circle = document.getElementById('drawCircle');
+            
+            function step(currentTime) {
+                if (!drawIsDrawing) return;
+                
+                const elapsed = currentTime - drawStartTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const initialInterval = DRAW_BASE_SPEED;
+                const finalInterval = 500;
+                const currentInterval = initialInterval + (finalInterval - initialInterval) * Math.pow(progress, 2);
+                
+                const randomIndex = Math.floor(Math.random() * availableStudents.length);
+                circle.textContent = availableStudents[randomIndex];
+                
+                if (progress < 1) {
+                    drawTimeout = setTimeout(() => {
+                        drawAnimationFrame = requestAnimationFrame((time) => step(time));
+                    }, currentInterval);
+                } else {
+                    stopDraw();
+                }
+            }
+            
+            drawAnimationFrame = requestAnimationFrame((time) => step(time));
+        }
+
+        function animateDrawManual(availableStudents) {
+            const circle = document.getElementById('drawCircle');
+            
+            function step() {
+                if (!drawIsDrawing) return;
+                
+                const randomIndex = Math.floor(Math.random() * availableStudents.length);
+                circle.textContent = availableStudents[randomIndex];
+                
+                drawTimeout = setTimeout(() => {
+                    drawAnimationFrame = requestAnimationFrame(step);
+                }, DRAW_BASE_SPEED);
+            }
+            
+            drawAnimationFrame = requestAnimationFrame(step);
+        }
+
+        function stopDraw() {
+            if (!drawIsDrawing) return;
+            
+            drawIsDrawing = false;
+            
+            if (drawTimeout) {
+                clearTimeout(drawTimeout);
+                drawTimeout = null;
+            }
+            if (drawAnimationFrame) {
+                cancelAnimationFrame(drawAnimationFrame);
+                drawAnimationFrame = null;
+            }
+            
+            const btn = document.getElementById('actionBtn');
+            const circle = document.getElementById('drawCircle');
+            
+            btn.textContent = 'Start';
+            btn.classList.remove('stop');
+            btn.classList.add('start');
+            circle.classList.remove('rolling');
+            circle.classList.add('winner');
+            
+            const winner = circle.textContent;
+            if (winner && winner !== '?' && !drawHistory.includes(winner)) {
+                drawHistory.unshift(winner);
+                if (drawHistory.length > 51) drawHistory.pop();
+                updateDrawHistoryDisplay();
+            }
+        }
+
+        function updateDrawHistoryDisplay() {
+            const list = document.getElementById('historyList');
+            const count = document.getElementById('historyCount');
+            
+            count.textContent = '(' + drawHistory.length + '/51)';
+            list.innerHTML = '';
+            
+            drawHistory.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.textContent = (drawHistory.length - index) + '. ' + item;
+                list.appendChild(div);
+            });
+        }
+
+        function toggleHistory() {
+            const list = document.getElementById('historyList');
+            const toggle = document.getElementById('historyToggle');
+            
+            list.classList.toggle('collapsed');
+            toggle.classList.toggle('collapsed');
+        }
+
         // ========== 工具函数 ==========
         function showToast(message, type) {
             const container = document.getElementById('toastContainer');
@@ -2391,6 +3149,13 @@
         });
         document.getElementById('examSettingsModal').addEventListener('click', function(e) {
             if (e.target === this) closeExamSettings();
+        });
+
+        // 防止空格键滚动页面
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target === document.body) {
+                e.preventDefault();
+            }
         });
     </script>
 </body>
