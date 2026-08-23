@@ -2037,8 +2037,8 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
+     
 
-        
         // ========== 本地存储封装（必须先定义） ==========
         const Storage = {
             set: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
@@ -2284,7 +2284,7 @@
             showMainScreen();
         }
 
-        // ========== 主界面切换 ==========
+        // ========== 主界面 ==========
         function showMainScreen() {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainScreen').classList.add('active');
@@ -2298,6 +2298,7 @@
         function updateUserDisplay() {
             if (!currentUser) return;
             document.getElementById('topUsername').textContent = currentUser.username;
+
             const avatar = document.getElementById('topAvatar');
             if (currentUser.avatar) {
                 avatar.innerHTML = '<img src="' + currentUser.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
@@ -2312,29 +2313,28 @@
             document.querySelector('.nav-tab[data-tab="' + tab + '"]').classList.add('active');
             document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + tab).classList.add('active');
-
-            if (tab === 'exam') {
-                initExamTimer();
-            }
+            if (tab === 'exam') initExamTimer();
         }
 
         // ========== 时钟 ==========
         function initClock() {
             function updateClock() {
                 const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                document.getElementById('topClock').textContent = hours + ':' + minutes;
+                document.getElementById('topClock').textContent =
+                    String(now.getHours()).padStart(2, '0') + ':' +
+                    String(now.getMinutes()).padStart(2, '0');
             }
             updateClock();
             clockTimer = setInterval(updateClock, 1000);
         }
 
-        // ========== 个人信息 ==========
+        // ========== 个人资料 ==========
         function openProfile() {
             if (!currentUser) return;
+
             document.getElementById('profileNameInput').value = currentUser.username;
             document.getElementById('profileEmailInput').value = currentUser.email;
+
             const roleMap = { headteacher: '班主任', teacher: '教师', parent: '家长', student: '学生' };
             document.getElementById('profileRoleInput').value = roleMap[currentUser.role] || currentUser.role;
 
@@ -2396,7 +2396,7 @@
             location.reload();
         }
 
-        // ========== 新闻系统 ==========
+        // ========== 新闻 ==========
         function publishNews() {
             const content = document.getElementById('newsInput').value.trim();
             if (!content) {
@@ -2428,14 +2428,20 @@
 
             container.innerHTML = news.map(item => {
                 const date = new Date(item.time);
-                const timeStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0') + ' ' + String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
-                return '<div class="news-item"><div class="news-meta"><span>' + (item.author || '管理员') + '</span><span>' + timeStr + '</span></div><div class="news-content">' + escapeHtml(item.content) + '</div></div>';
+                const timeStr = date.getFullYear() + '-' +
+                    String(date.getMonth()+1).padStart(2,'0') + '-' +
+                    String(date.getDate()).padStart(2,'0') + ' ' +
+                    String(date.getHours()).padStart(2,'0') + ':' +
+                    String(date.getMinutes()).padStart(2,'0');
+
+                return '<div class="news-item">' +
+                    '<div class="news-meta"><span>' + (item.author || '管理员') + '</span><span>' + timeStr + '</span></div>' +
+                    '<div class="news-content">' + escapeHtml(item.content) + '</div>' +
+                    '</div>';
             }).join('');
         }
 
-        // ========== C2 AI (Gemini) ==========
-        const GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || '';
-
+        // ========== C2 AI (已修改为调用 Cloudflare Worker 代理) ==========
         async function sendAIMessage() {
             const input = document.getElementById('aiInput');
             const message = input.value.trim();
@@ -2450,19 +2456,11 @@
             messagesDiv.innerHTML += '<div class="chat-message ai" id="' + loadingId + '"><div class="loading-spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:8px;"></div>思考中...</div>';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-                document.getElementById(loadingId).innerHTML = '⚠️ 请先配置 Gemini API Key。<br><br>获取方式：<br>1. 访问 <a href="https://aistudio.google.com/app/apikey"; target="_blank" style="color:#0070d1;">Google AI Studio</a><br>2. 点击 "Create API Key"<br>3. 在浏览器控制台执行：localStorage.setItem("gemini_api_key", "你的APIKey")<br>4. 刷新页面即可使用';
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                return;
-            }
-
             try {
-                const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + GEMINI_API_KEY, {
+                const response = await fetch('https://c2-ai.lucaswang1329.workers.dev', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: message }] }]
-                    })
+                    body: JSON.stringify({ message: message })
                 });
 
                 if (!response.ok) {
@@ -2472,7 +2470,7 @@
                 const data = await response.json();
                 let reply = '抱歉，我暂时无法回答这个问题。';
 
-                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
                     reply = data.candidates[0].content.parts[0].text;
                 } else if (data.error) {
                     reply = 'API错误: ' + data.error.message;
@@ -2480,24 +2478,20 @@
 
                 document.getElementById(loadingId).innerHTML = escapeHtml(reply).replace(/\n/g, '<br>');
             } catch (error) {
-                document.getElementById(loadingId).innerHTML = '❌ 连接失败: ' + escapeHtml(error.message) + '<br><br>请检查：<br>1. API Key 是否正确<br>2. 网络连接是否正常<br>3. 是否超出免费额度限制（15 RPM）';
+                document.getElementById(loadingId).innerHTML = '❌ 连接失败: ' + escapeHtml(error.message) + '<br><br>请检查网络连接是否正常。';
             }
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        // ========== 文件云存储 ==========
+        // ========== 文件 ==========
         function handleFileSelect(event) {
             const files = event.target.files;
-            if (files.length > 0) {
-                processFiles(files);
-            }
+            if (files.length > 0) processFiles(files);
         }
 
         function handleFileDrop(event) {
             const files = event.dataTransfer.files;
-            if (files.length > 0) {
-                processFiles(files);
-            }
+            if (files.length > 0) processFiles(files);
         }
 
         function processFiles(files) {
@@ -2533,7 +2527,11 @@
 
             container.innerHTML = files.map((file, index) => {
                 const icon = getFileIcon(file.name);
-                return '<div class="file-item" onclick="downloadFile(' + index + ')"><div class="file-icon">' + icon + '</div><div class="file-name">' + escapeHtml(file.name) + '</div><div class="file-size">' + file.size + '</div></div>';
+                return '<div class="file-item" onclick="downloadFile(' + index + ')">' +
+                    '<div class="file-icon">' + icon + '</div>' +
+                    '<div class="file-name">' + escapeHtml(file.name) + '</div>' +
+                    '<div class="file-size">' + file.size + '</div>' +
+                    '</div>';
             }).join('');
         }
 
@@ -2574,7 +2572,6 @@
         function publishPost() {
             const content = document.getElementById('postInput').value.trim();
             const visibility = document.getElementById('postVisibility').value;
-
             if (!content) {
                 showToast('请输入内容', 'error');
                 return;
@@ -2613,16 +2610,32 @@
 
             container.innerHTML = visiblePosts.map(post => {
                 const date = new Date(post.time);
-                const timeStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0') + ' ' + String(date.getHours()).padStart(2,'0') + ':' + String(date.getMinutes()).padStart(2,'0');
-                const visibilityLabel = post.visibility === 'students' ? '🔒 仅学生' : post.visibility === 'teachers' ? '🔒 仅教师' : '🌐 公开';
+                const timeStr = date.getFullYear() + '-' +
+                    String(date.getMonth()+1).padStart(2,'0') + '-' +
+                    String(date.getDate()).padStart(2,'0') + ' ' +
+                    String(date.getHours()).padStart(2,'0') + ':' +
+                    String(date.getMinutes()).padStart(2,'0');
+
+                const visibilityLabel = post.visibility === 'students' ? '🔒 仅学生' :
+                    post.visibility === 'teachers' ? '🔒 仅教师' : '🌐 公开';
 
                 let avatarHtml = '<div class="post-avatar">' + (post.author ? post.author.charAt(0).toUpperCase() : 'U') + '</div>';
 
-                return '<div class="post-card"><div class="post-header"><div class="post-author">' + avatarHtml + '<div><div style="font-weight:600;">' + escapeHtml(post.author || '匿名') + '</div><div class="post-meta">' + timeStr + ' · ' + visibilityLabel + '</div></div></div></div><div class="post-content">' + escapeHtml(post.content) + '</div><div class="post-actions"><div class="post-action">👍 点赞</div><div class="post-action">💬 评论</div><div class="post-action">↗️ 分享</div></div></div>';
+                return '<div class="post-card">' +
+                    '<div class="post-header">' +
+                    '<div class="post-author">' + avatarHtml +
+                    '<div><div style="font-weight:600;">' + escapeHtml(post.author || '匿名') + '</div>' +
+                    '<div class="post-meta">' + timeStr + ' · ' + visibilityLabel + '</div></div></div></div>' +
+                    '<div class="post-content">' + escapeHtml(post.content) + '</div>' +
+                    '<div class="post-actions">' +
+                    '<div class="post-action">👍 点赞</div>' +
+                    '<div class="post-action">💬 评论</div>' +
+                    '<div class="post-action">↗️ 分享</div>' +
+                    '</div></div>';
             }).join('');
         }
 
-        // ========== 群聊 ==========
+        // ========== 聊天室 ==========
         function renderRoomList() {
             const container = document.getElementById('roomListContainer');
             const roomKeys = Object.keys(rooms);
@@ -2631,13 +2644,18 @@
                 const room = rooms[key];
                 const lastMsg = room.messages && room.messages.length > 0 ? room.messages[room.messages.length - 1] : null;
                 const preview = lastMsg ? (lastMsg.user + ': ' + lastMsg.text).substring(0, 20) + '...' : '暂无消息';
-                return '<div class="room-item ' + (key === currentRoom ? 'active' : '') + '" onclick="joinRoom(\'' + key + '\')"><div class="room-name">' + room.name + '</div><div class="room-preview">' + preview + '</div></div>';
+
+                return '<div class="room-item ' + (key === currentRoom ? 'active' : '') + '" onclick="joinRoom(\'' + key + '\')">' +
+                    '<div class="room-name">' + room.name + '</div>' +
+                    '<div class="room-preview">' + preview + '</div>' +
+                    '</div>';
             }).join('');
         }
 
         function joinRoom(roomId) {
             currentRoom = roomId;
             renderRoomList();
+
             const room = rooms[roomId];
             document.getElementById('currentRoomName').textContent = room.name;
             renderRoomMessages();
@@ -2646,6 +2664,7 @@
         function renderRoomMessages() {
             const container = document.getElementById('roomMessages');
             const room = rooms[currentRoom];
+
             if (!room || !room.messages) {
                 container.innerHTML = '<div class="chat-message ai">欢迎来到聊天室！</div>';
                 return;
@@ -2653,8 +2672,11 @@
 
             container.innerHTML = room.messages.map(msg => {
                 const isUser = msg.user === currentUser.username;
-                return '<div class="chat-message ' + (isUser ? 'user' : 'ai') + '"><div style="font-size:0.75rem; opacity:0.7; margin-bottom:4px;">' + escapeHtml(msg.user || '匿名') + '</div>' + escapeHtml(msg.text) + '</div>';
+                return '<div class="chat-message ' + (isUser ? 'user' : 'ai') + '">' +
+                    '<div style="font-size:0.75rem; opacity:0.7; margin-bottom:4px;">' + escapeHtml(msg.user || '匿名') + '</div>' +
+                    escapeHtml(msg.text) + '</div>';
             }).join('');
+
             container.scrollTop = container.scrollHeight;
         }
 
@@ -2662,8 +2684,8 @@
             const input = document.getElementById('roomInput');
             const text = input.value.trim();
             if (!text) return;
-
             if (!rooms[currentRoom]) return;
+
             rooms[currentRoom].messages.push({
                 text: text,
                 user: currentUser.username,
@@ -2703,6 +2725,19 @@
         }
 
         // ========== 考试模式 ==========
+        function getCurrentSubjectIndex() {
+            const now = new Date();
+            for (let i = 0; i < examSubjects.length; i++) {
+                const startTime = new Date(examSubjects[i].start);
+                const endTime = new Date(examSubjects[i].end);
+                if (now >= startTime && now <= endTime) return i;
+            }
+            for (let i = 0; i < examSubjects.length; i++) {
+                if (now < new Date(examSubjects[i].start)) return i;
+            }
+            return examSubjects.length - 1;
+        }
+
         function initExamTimer() {
             if (examTimer) clearInterval(examTimer);
             updateExamDisplay();
@@ -2717,7 +2752,10 @@
 
             if (!currentTimeEl || !statusEl || !progressBar) return;
 
-            currentTimeEl.textContent = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+            currentTimeEl.textContent =
+                String(now.getHours()).padStart(2,'0') + ':' +
+                String(now.getMinutes()).padStart(2,'0') + ':' +
+                String(now.getSeconds()).padStart(2,'0');
 
             const subject = examSubjects[currentExamIndex];
             if (!subject) return;
@@ -2731,7 +2769,10 @@
                 const minutes = Math.floor(diff / 60000);
                 const hours = Math.floor(minutes / 60);
                 const mins = minutes % 60;
-                statusEl.textContent = '距离考试还有 ' + (hours > 0 ? hours + '小时' : '') + mins + '分钟';
+                const secs = Math.floor((diff % 60000) / 1000);
+
+                statusEl.textContent = '距离' + subject.name + '考试还有 ' +
+                    (hours > 0 ? hours + '小时' : '') + mins + '分' + secs + '秒';
                 statusEl.className = 'exam-status upcoming';
                 progressBar.style.width = '100%';
             } else if (now >= startTime && now <= endTime) {
@@ -2741,11 +2782,12 @@
                 const remainingSeconds = Math.floor((remaining % 60000) / 1000);
                 const progress = (elapsed / totalDuration) * 100;
 
-                statusEl.textContent = '考试进行中 - 剩余 ' + remainingMinutes + ':' + String(remainingSeconds).padStart(2,'0');
+                statusEl.textContent = subject.name + '考试进行中 - 剩余 ' +
+                    remainingMinutes + ':' + String(remainingSeconds).padStart(2,'0');
                 statusEl.className = 'exam-status';
                 progressBar.style.width = (100 - progress) + '%';
             } else {
-                statusEl.textContent = '考试结束';
+                statusEl.textContent = subject.name + '考试已结束';
                 statusEl.className = 'exam-status ended';
                 progressBar.style.width = '0%';
             }
@@ -2766,9 +2808,17 @@
             container.innerHTML = examSubjects.map((sub, i) => {
                 const start = new Date(sub.start);
                 const end = new Date(sub.end);
-                const startStr = String(start.getMonth()+1).padStart(2,'0') + '-' + String(start.getDate()).padStart(2,'0') + ' ' + String(start.getHours()).padStart(2,'0') + ':' + String(start.getMinutes()).padStart(2,'0');
-                const endStr = String(end.getHours()).padStart(2,'0') + ':' + String(end.getMinutes()).padStart(2,'0');
-                return '<div class="schedule-item"><span class="schedule-subject">' + sub.name + '</span><span class="schedule-time">' + startStr + ' - ' + endStr + '</span></div>';
+                const startStr = String(start.getMonth()+1).padStart(2,'0') + '-' +
+                    String(start.getDate()).padStart(2,'0') + ' ' +
+                    String(start.getHours()).padStart(2,'0') + ':' +
+                    String(start.getMinutes()).padStart(2,'0');
+                const endStr = String(end.getHours()).padStart(2,'0') + ':' +
+                    String(end.getMinutes()).padStart(2,'0');
+
+                return '<div class="schedule-item">' +
+                    '<span class="schedule-subject">' + sub.name + '</span>' +
+                    '<span class="schedule-time">' + startStr + ' - ' + endStr + '</span>' +
+                    '</div>';
             }).join('');
         }
 
@@ -2777,7 +2827,11 @@
             if (!container) return;
 
             container.innerHTML = examSubjects.map((sub, i) => {
-                return '<div class="exam-setting-row"><label>' + sub.name + '</label><input type="datetime-local" id="exam-start-' + i + '" value="' + sub.start + '"><input type="datetime-local" id="exam-end-' + i + '" value="' + sub.end + '"></div>';
+                return '<div class="exam-setting-row">' +
+                    '<label>' + sub.name + '</label>' +
+                    '<input type="datetime-local" id="exam-start-' + i + '" value="' + sub.start + '">' +
+                    '<input type="datetime-local" id="exam-end-' + i + '" value="' + sub.end + '">' +
+                    '</div>';
             }).join('');
         }
 
@@ -2824,18 +2878,14 @@
             }
         }
 
-        // ========== 随机抽选功能（嵌入） ==========
+        // ========== 随机抽选 ==========
         function generateDrawStudents(range) {
             const list = [];
             if (range === 'A' || range === 'ALL') {
-                for (let i = 1; i <= 26; i++) {
-                    list.push('A' + i);
-                }
+                for (let i = 1; i <= 26; i++) list.push('A' + i);
             }
             if (range === 'B' || range === 'ALL') {
-                for (let i = 1; i <= 25; i++) {
-                    list.push('B' + i);
-                }
+                for (let i = 1; i <= 25; i++) list.push('B' + i);
             }
             return list;
         }
@@ -2843,20 +2893,19 @@
         function selectRange(range) {
             drawCurrentRange = range;
             drawStudents = generateDrawStudents(range);
-            
+
             let displayText = '';
             if (range === 'A') displayText = 'Class A (A1~A26)';
             else if (range === 'B') displayText = 'Class B (B1~B25)';
             else displayText = 'Whole Class (A1~A26 + B1~B25)';
+
             document.getElementById('rangeDisplay').textContent = displayText;
-            
             drawSelectedStudents = new Set(drawStudents);
             drawExcludedStudents = new Set();
             drawHistory = [];
             updateDrawHistoryDisplay();
-            
             renderDrawStudents();
-            
+
             document.getElementById('rangeSelector').style.display = 'none';
             document.getElementById('drawPanel').style.display = 'block';
         }
@@ -2870,40 +2919,35 @@
         function renderDrawStudents() {
             const grid = document.getElementById('studentsGrid');
             grid.innerHTML = '';
-            
+
             drawStudents.forEach(id => {
                 const div = document.createElement('div');
                 div.className = 'student-item';
                 div.textContent = id;
                 div.dataset.id = id;
-                
-                if (drawSelectedStudents.has(id)) {
-                    div.classList.add('draw-selected');
-                }
-                if (drawExcludedStudents.has(id)) {
-                    div.classList.add('excluded');
-                }
-                
-                div.addEventListener('click', (e) => {
-                    if (drawExcludedStudents.has(id)) return;
-                    toggleDrawStudent(id);
+
+                if (drawSelectedStudents.has(id)) div.classList.add('draw-selected');
+                if (drawExcludedStudents.has(id)) div.classList.add('excluded');
+
+                div.addEventListener('click', () => {
+                    if (!drawExcludedStudents.has(id)) toggleDrawStudent(id);
                 });
-                
-                div.addEventListener('mousedown', (e) => startDrawLongPress(id, div));
-                div.addEventListener('touchstart', (e) => startDrawLongPress(id, div), {passive: true});
-                div.addEventListener('mouseup', (e) => endDrawLongPress(id, div));
-                div.addEventListener('touchend', (e) => endDrawLongPress(id, div));
+
+                div.addEventListener('mousedown', () => startDrawLongPress(id, div));
+                div.addEventListener('touchstart', () => startDrawLongPress(id, div), {passive: true});
+                div.addEventListener('mouseup', () => endDrawLongPress());
+                div.addEventListener('touchend', () => endDrawLongPress());
                 div.addEventListener('mouseleave', () => cancelDrawLongPress());
                 div.addEventListener('touchcancel', () => cancelDrawLongPress());
-                
+
                 grid.appendChild(div);
             });
         }
 
         function toggleDrawStudent(id) {
             if (drawExcludedStudents.has(id)) return;
-            
             const div = document.querySelector('#draw-container [data-id="' + id + '"]');
+
             if (drawSelectedStudents.has(id)) {
                 drawSelectedStudents.delete(id);
                 div.classList.remove('draw-selected');
@@ -2915,26 +2959,23 @@
 
         function startDrawLongPress(id, div) {
             if (drawExcludedStudents.has(id)) return;
-            
             const availableCount = drawStudents.filter(s => !drawExcludedStudents.has(s)).length;
             if (availableCount < 3) return;
-            
+
             drawLongPressTimer = setTimeout(() => {
                 drawExcludedStudents.add(id);
                 drawSelectedStudents.delete(id);
                 div.classList.add('excluded');
-                
+
                 const flash = document.getElementById('screenFlash');
                 flash.classList.add('draw-active');
-                setTimeout(() => {
-                    flash.classList.remove('draw-active');
-                }, 300);
-                
+                setTimeout(() => { flash.classList.remove('draw-active'); }, 300);
+
                 drawLongPressTimer = null;
             }, 3000);
         }
 
-        function endDrawLongPress(id, div) {
+        function endDrawLongPress() {
             if (drawLongPressTimer) {
                 clearTimeout(drawLongPressTimer);
                 drawLongPressTimer = null;
@@ -2950,9 +2991,7 @@
 
         function selectAll() {
             drawStudents.forEach(id => {
-                if (!drawExcludedStudents.has(id)) {
-                    drawSelectedStudents.add(id);
-                }
+                if (!drawExcludedStudents.has(id)) drawSelectedStudents.add(id);
             });
             renderDrawStudents();
         }
@@ -2974,60 +3013,51 @@
 
         function setMode(mode) {
             drawCurrentMode = mode;
-            document.querySelectorAll('#draw-container .mode-btn').forEach(btn => {
-                btn.classList.remove('draw-active');
-            });
+            document.querySelectorAll('#draw-container .mode-btn').forEach(btn => btn.classList.remove('draw-active'));
             event.target.classList.add('draw-active');
         }
 
         function toggleDraw() {
-            if (drawIsDrawing) {
-                stopDraw();
-            } else {
-                startDraw();
-            }
+            if (drawIsDrawing) stopDraw();
+            else startDraw();
         }
 
         function startDraw() {
             const availableStudents = Array.from(drawSelectedStudents).filter(id => !drawExcludedStudents.has(id));
             if (availableStudents.length === 0) return;
-            
+
             drawIsDrawing = true;
             const btn = document.getElementById('actionBtn');
             const circle = document.getElementById('drawCircle');
-            
+
             btn.textContent = 'Stop';
             btn.classList.remove('start');
             btn.classList.add('stop');
             circle.classList.add('rolling');
             circle.classList.remove('winner');
-            
+
             drawStartTime = performance.now();
-            
-            if (drawCurrentMode === 'auto') {
-                animateDrawAuto(availableStudents);
-            } else {
-                animateDrawManual(availableStudents);
-            }
+
+            if (drawCurrentMode === 'auto') animateDrawAuto(availableStudents);
+            else animateDrawManual(availableStudents);
         }
 
         function animateDrawAuto(availableStudents) {
             const duration = 5000;
             const circle = document.getElementById('drawCircle');
-            
+
             function step(currentTime) {
                 if (!drawIsDrawing) return;
-                
                 const elapsed = currentTime - drawStartTime;
                 const progress = Math.min(elapsed / duration, 1);
-                
+
                 const initialInterval = DRAW_BASE_SPEED;
                 const finalInterval = 500;
                 const currentInterval = initialInterval + (finalInterval - initialInterval) * Math.pow(progress, 2);
-                
+
                 const randomIndex = Math.floor(Math.random() * availableStudents.length);
                 circle.textContent = availableStudents[randomIndex];
-                
+
                 if (progress < 1) {
                     drawTimeout = setTimeout(() => {
                         drawAnimationFrame = requestAnimationFrame((time) => step(time));
@@ -3036,50 +3066,39 @@
                     stopDraw();
                 }
             }
-            
             drawAnimationFrame = requestAnimationFrame((time) => step(time));
         }
 
         function animateDrawManual(availableStudents) {
             const circle = document.getElementById('drawCircle');
-            
+
             function step() {
                 if (!drawIsDrawing) return;
-                
                 const randomIndex = Math.floor(Math.random() * availableStudents.length);
                 circle.textContent = availableStudents[randomIndex];
-                
                 drawTimeout = setTimeout(() => {
                     drawAnimationFrame = requestAnimationFrame(step);
                 }, DRAW_BASE_SPEED);
             }
-            
             drawAnimationFrame = requestAnimationFrame(step);
         }
 
         function stopDraw() {
             if (!drawIsDrawing) return;
-            
             drawIsDrawing = false;
-            
-            if (drawTimeout) {
-                clearTimeout(drawTimeout);
-                drawTimeout = null;
-            }
-            if (drawAnimationFrame) {
-                cancelAnimationFrame(drawAnimationFrame);
-                drawAnimationFrame = null;
-            }
-            
+
+            if (drawTimeout) { clearTimeout(drawTimeout); drawTimeout = null; }
+            if (drawAnimationFrame) { cancelAnimationFrame(drawAnimationFrame); drawAnimationFrame = null; }
+
             const btn = document.getElementById('actionBtn');
             const circle = document.getElementById('drawCircle');
-            
+
             btn.textContent = 'Start';
             btn.classList.remove('stop');
             btn.classList.add('start');
             circle.classList.remove('rolling');
             circle.classList.add('winner');
-            
+
             const winner = circle.textContent;
             if (winner && winner !== '?' && !drawHistory.includes(winner)) {
                 drawHistory.unshift(winner);
@@ -3091,10 +3110,9 @@
         function updateDrawHistoryDisplay() {
             const list = document.getElementById('historyList');
             const count = document.getElementById('historyCount');
-            
             count.textContent = '(' + drawHistory.length + '/51)';
             list.innerHTML = '';
-            
+
             drawHistory.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
@@ -3106,7 +3124,6 @@
         function toggleHistory() {
             const list = document.getElementById('historyList');
             const toggle = document.getElementById('historyToggle');
-            
             list.classList.toggle('collapsed');
             toggle.classList.toggle('collapsed');
         }
@@ -3140,22 +3157,21 @@
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
-        // 点击模态框外部关闭
+        // ========== 事件监听 ==========
         document.getElementById('profileModal').addEventListener('click', function(e) {
             if (e.target === this) closeProfile();
         });
+
         document.getElementById('createRoomModal').addEventListener('click', function(e) {
             if (e.target === this) closeRoomModal();
         });
+
         document.getElementById('examSettingsModal').addEventListener('click', function(e) {
             if (e.target === this) closeExamSettings();
         });
 
-        // 防止空格键滚动页面
         window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && e.target === document.body) {
-                e.preventDefault();
-            }
+            if (e.code === 'Space' && e.target === document.body) e.preventDefault();
         });
     </script>
 </body>
