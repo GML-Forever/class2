@@ -81,7 +81,7 @@
         .news-item:hover { background: var(--ps5-card-hover); }
         .news-meta { display: flex; justify-content: space-between; color: var(--ps5-text-dim); font-size: 0.85rem; margin-bottom: 10px; }
         .news-content { font-size: 1rem; line-height: 1.6; }
-        .news-card-banner { width: 100%; height: 280px; border-radius: var(--ps5-radius); background: url('95D5CD79-69C6-4EAA-AD04-5E40DA20623B.jpg') center/cover no-repeat; position: relative; overflow: hidden; cursor: pointer; margin-bottom: 30px; transition: var(--ps5-transition); border: 1px solid var(--ps5-border); }
+        .news-card-banner { width: 100%; height: 280px; border-radius: var(--ps5-radius); background: url('B631A06A-E959-43DC-A25D-5A3B4EB7BACE.jpg') center/cover no-repeat; position: relative; overflow: hidden; margin-bottom: 30px; transition: var(--ps5-transition); border: 1px solid var(--ps5-border); }
         .news-card-banner::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%); transition: var(--ps5-transition); }
         .news-card-banner:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
         .news-card-banner:hover::before { background: linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%); }
@@ -321,10 +321,10 @@
             <div class="page-section active" id="page-welcome">
                 <div class="page-header">欢迎</div>
                 <div class="page-subtitle">班级最新动态与重要消息</div>
-                <div class="news-card-banner" id="newsCardBanner" onclick="expandNewsCard()">
+                <div class="news-card-banner" id="newsCardBanner">
                     <div class="news-card-content">
                         <div class="news-card-title">非同凡响</div>
-                        <div class="news-card-subtitle">点击查看详情</div>
+                        <div class="news-card-subtitle">C2 Intelligence · 非同凡响</div>
                     </div>
                 </div>
                 <div id="newsEditorSection" style="display:none;">
@@ -517,7 +517,6 @@
     <script>
 
         
-
         // ========== 本地存储封装（必须先定义） ==========
         const Storage = {
             set: (key, value) => {
@@ -949,7 +948,7 @@
             }).join('');
         }
 
-                async function sendAIMessage() {
+        async function sendAIMessage() {
             const input = document.getElementById('aiInput');
             const message = input.value.trim();
             if (!message) return;
@@ -974,12 +973,12 @@
                 } else if (data.error) { reply = 'API错误: ' + data.error.message; }
                 document.getElementById(loadingId).innerHTML = escapeHtml(reply).replace(/\n/g, '<br>');
             } catch (error) {
-                document.getElementById(loadingId).innerHTML = '❌ 连接失败: ' + escapeHtml(error.message) + '<br><br>请检查网络连接是否正常。';
+                document.getElementById(loadingId).innerHTML = '❌ 连接失败: ' + escapeHtml(error.message) + '<br><br>请检查网络连接是否正常';
             }
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-function handleFileSelect(event) { const files = event.target.files; if (files.length > 0) processFiles(files); }
+        function handleFileSelect(event) { const files = event.target.files; if (files.length > 0) processFiles(files); }
         function handleFileDrop(event) { const files = event.dataTransfer.files; if (files.length > 0) processFiles(files); }
 
         function processFiles(files) {
